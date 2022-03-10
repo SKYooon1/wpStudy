@@ -14,9 +14,6 @@ bool blankFlag{ true };		// Convert by command f
 
 int main()
 {
-	std::string a;
-	std::cin >> a;
-
 	std::cout << "Input sentence: ";
 	std::vector<std::string> wordsInput;
 	inputSentence(wordsInput);
@@ -46,6 +43,7 @@ void printSentence(std::vector<std::string>& wordsInput)
 	else
 		for (std::string s : wordsInput)
 			std::cout << s << "@";
+	std::cout << std::endl;
 }
 
 void getCommand(std::vector<std::string>& wordsInput)
@@ -68,9 +66,10 @@ void getCommand(std::vector<std::string>& wordsInput)
 		case 'f':		// Convert blank to at, at to blank
 			std::cout << "f: ";
 			blankFlag = !blankFlag;
+			printSentence(wordsInput);
 			break;
 		case 'l':		// Count the words
-			std::cout << "l: " << wordsInput.size() << " words";
+			std::cout << "l: " << wordsInput.size() << " words" << std::endl;
 			break;
 		case 'c':
 			std::cout << "c: ";
@@ -80,35 +79,36 @@ void getCommand(std::vector<std::string>& wordsInput)
 			rotateSentence(wordsInput);
 			break;
 		}
-		printSentence(wordsInput);
-		std::cout << std::endl;
 	}
 }
 
 void convertEwordToUpper(std::vector<std::string>& wordsInput)
 {
 	bool eFlag{};
-	for (std::string s : wordsInput)
+
+	for (std::string& s : wordsInput)
 	{
-		for (char c : s)		// Is there e or E?
+		for (char& c : s)		// Is there e or E?
 		{
 			if (c == 'e' || c == 'E')
 				eFlag = true;
 		}
 		if (eFlag)				// If it is, convert to upper case
 		{
-			for (char c : s)
+			for (char& c : s)
 				c = toupper(c);
 			eFlag = false;		// Clear the flag
 		}
 	}
+
+	printSentence(wordsInput);
 }
 
 void convertCase(std::vector<std::string>& wordsInput)
 {
-	for (std::string s : wordsInput)
+	for (std::string& s : wordsInput)
 	{
-		for (char c : s)
+		for (char& c : s)
 		{
 			if (isupper(c))
 				c = tolower(c);
@@ -116,14 +116,19 @@ void convertCase(std::vector<std::string>& wordsInput)
 				c = toupper(c);
 		}
 	}
+
+	printSentence(wordsInput);
 }
 
 void rotateSentence(std::vector<std::string>& wordsInput)
 {
 	std::string& s = wordsInput.front();
 	wordsInput.back().push_back(s.front());		// Push back the first letter
+
 	if (s.size() == 1)		// If first word has just a letter, erase the word from the vector
 		wordsInput.erase(wordsInput.begin());
 	else					// Else, erase just a letter
 		s.erase(s.begin());
+
+	printSentence(wordsInput);
 }
