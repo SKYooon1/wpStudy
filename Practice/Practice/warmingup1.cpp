@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
+#include <sstream>
 #include <conio.h>
 
 void inputSentence(std::vector<std::string>& wordsInput);
@@ -9,14 +10,12 @@ void getCommand(std::vector<std::string>& wordsInput);
 void convertEwordToUpper(std::vector<std::string>& wordsInput);
 void convertCase(std::vector<std::string>& wordsInput);
 void rotateSentence(std::vector<std::string>& wordsInput);
+std::vector<std::string> split(std::string str, char delimiter);
 
 bool blankFlag{ true };		// Convert by command f
 
 int main()
 {
-	std::string a;
-	std::cin >> a;
-
 	std::cout << "Input sentence: ";
 	std::vector<std::string> wordsInput;
 	inputSentence(wordsInput);
@@ -27,13 +26,8 @@ int main()
 void inputSentence(std::vector<std::string>& wordsInput)
 {
 	std::string tempWord;
-	while (true)
-	{
-		std::cin >> tempWord;
-		wordsInput.push_back(tempWord);
-		if (tempWord.back() == '.')
-			break;
-	}
+	std::cin >> tempWord;
+	wordsInput = split(tempWord, ' ');
 }
 
 void printSentence(std::vector<std::string>& wordsInput)
@@ -126,4 +120,19 @@ void rotateSentence(std::vector<std::string>& wordsInput)
 		wordsInput.erase(wordsInput.begin());
 	else					// Else, erase just a letter
 		s.erase(s.begin());
+}
+
+std::vector<std::string> split(std::string str, char delimiter)
+{
+	std::istringstream iss(str);
+	std::string temp;
+
+	std::vector<std::string> result;
+
+	while (std::getline(iss, temp, delimiter))
+	{
+		result.push_back(temp);
+	}
+
+	return result;
 }
