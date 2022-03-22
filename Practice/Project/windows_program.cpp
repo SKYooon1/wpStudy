@@ -6,6 +6,13 @@ HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"Windows program 2_2";
 
+std::default_random_engine dre;
+std::uniform_int_distribution<int> uid_x{ 0, 700 };
+std::uniform_int_distribution<int> uid_y{ 0, 500 };
+std::uniform_int_distribution<int> uid_n{ 0, 9 };
+std::uniform_int_distribution<int> uid_count{ 20, 100 };
+std::uniform_int_distribution<int> uid_color{ 0, 700 };
+
 LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow)
@@ -34,7 +41,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 		lpszWindowName,
 		WS_OVERLAPPEDWINDOW,
 		0, 0,
-		1280, 800,
+		800, 600,
 		NULL,
 		(HMENU)NULL,
 		hInstance,
@@ -53,35 +60,37 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hDC;
-	RECT rect1{ 0, 0, 640, 400 };
-	RECT rect2{ 640, 0, 1280, 400 };
-	RECT rect3{ 0, 400, 640, 800 };
-	RECT rect4{ 640, 400, 1280, 800 };
-	std::default_random_engine dre;
-	std::uniform_int_distribution<int> uid;
 
+	int x = uid_x(dre);
+	int y = uid_y(dre);
+	RECT rect{ x, y, x + 100, y + 100 };
+
+	int n = uid_n(dre);
+	int count = uid_count(dre);
+
+	TCHAR str[100];
+
+	for (int i = 0; i < count; ++i)
+	{
+		str[i] = n + '0';
+	}
+	
 	switch (iMessage) {
 	case WM_PAINT:
 		hDC = BeginPaint(hWnd, &ps);
 
-		SetBkColor(hDC, RGB(uid(dre), uid(dre), uid(dre)));
-		SetTextColor(hDC, RGB(uid(dre), uid(dre), uid(dre)));
-		DrawText(hDC, L"This is left-top area", strlen("This is left-top area"), &rect1, DT_VCENTER | DT_CENTER | DT_SINGLELINE);
-
-		SetBkColor(hDC, RGB(uid(dre), uid(dre), uid(dre)));
-		SetTextColor(hDC, RGB(uid(dre), uid(dre), uid(dre)));
-		DrawText(hDC, L"This is right-top area", strlen("This is right-top area"), &rect2, DT_VCENTER | DT_CENTER | DT_SINGLELINE);
-
-		SetBkColor(hDC, RGB(uid(dre), uid(dre), uid(dre)));
-		SetTextColor(hDC, RGB(uid(dre), uid(dre), uid(dre)));
-		DrawText(hDC, L"This is left-bottom area", strlen("This is left-bottom area"), &rect3, DT_VCENTER | DT_CENTER | DT_SINGLELINE);
-
-		SetBkColor(hDC, RGB(uid(dre), uid(dre), uid(dre)));
-		SetTextColor(hDC, RGB(uid(dre), uid(dre), uid(dre)));
-		DrawText(hDC, L"This is right-bottom area", strlen("This is right-bottom area"), &rect4, DT_VCENTER | DT_CENTER | DT_SINGLELINE);
+		SetBkColor(hDC, RGB(uid_color(dre), uid_color(dre), uid_color(dre)));
+		SetTextColor(hDC, RGB(uid_color(dre), uid_color(dre), uid_color(dre)));
+		DrawText(hDC, str, count, &rect, DT_LEFT | DT_TOP | DT_WORDBREAK | DT_EDITCONTROL);
 
 		EndPaint(hWnd, &ps);
 		break;
+	case WM_KEYDOWN:
+		if (wParam == VK_ESCAPE)
+		{
+			PostQuitMessage(0);
+			return 0;
+		}
 	case WM_DESTROY:
 		PostQuitMessage(0);
 		return 0;
