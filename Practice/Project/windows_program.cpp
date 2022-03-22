@@ -3,7 +3,7 @@
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
-LPCTSTR lpszWindowName = L"Windows program 2_1";
+LPCTSTR lpszWindowName = L"Windows program 2_2";
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
@@ -33,7 +33,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 		lpszWindowName,
 		WS_OVERLAPPEDWINDOW,
 		0, 0,
-		900, 750,
+		1280, 800,
 		NULL,
 		(HMENU)NULL,
 		hInstance,
@@ -52,16 +52,21 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hDC;
+	RECT rect1{ 0, 0, 640, 400 };
+	RECT rect2{ 640, 0, 1280, 400 };
+	RECT rect3{ 0, 400, 640, 800 };
+	RECT rect4{ 640, 400, 1280, 800 };
 
 	switch (iMessage) {
 	case WM_PAINT:
 		hDC = BeginPaint(hWnd, &ps);
 
-		TextOut(hDC, 0, 0, L"Left-top (0, 0)", strlen("Left-top (0,0)"));
-		TextOut(hDC, 700, 0, L"Right-top (700, 0)", strlen("Right-top (700, 0)"));
-		TextOut(hDC, 0, 650, L"Left-bottom (0, 650)", strlen("Left-bottom (0, 650)"));
-		TextOut(hDC, 700, 650, L"Right-bottom (700, 650)", strlen("Right-bottom (700, 650)"));
-		TextOut(hDC, 350, 300, L"Center (350, 300)", strlen("Center (350, 600)"));
+		SetBkColor(hDC, RGB(0, 0, 0));
+		SetTextColor(hDC, RGB(255, 255, 255));
+		DrawText(hDC, L"This is left-top area", strlen("This is left-top area"), &rect1, DT_VCENTER | DT_CENTER | DT_SINGLELINE);
+		DrawText(hDC, L"This is right-top area", strlen("This is right-top area"), &rect2, DT_VCENTER | DT_CENTER | DT_SINGLELINE);
+		DrawText(hDC, L"This is left-bottom area", strlen("This is left-bottom area"), &rect3, DT_VCENTER | DT_CENTER | DT_SINGLELINE);
+		DrawText(hDC, L"This is right-bottom area", strlen("This is right-bottom area"), &rect4, DT_VCENTER | DT_CENTER | DT_SINGLELINE);
 
 		EndPaint(hWnd, &ps);
 		break;
