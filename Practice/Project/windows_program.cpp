@@ -3,7 +3,7 @@
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
-LPCTSTR lpszWindowName = L"Windows program 1";
+LPCTSTR lpszWindowName = L"Windows program 2_1";
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
@@ -22,13 +22,22 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	wndClass.hInstance = hInstance;
 	wndClass.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wndClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-	wndClass.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
+	wndClass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wndClass.lpszMenuName = NULL;
 	wndClass.lpszClassName = lpszClass;
 	wndClass.hIconSm = LoadIcon(NULL, IDI_APPLICATION);
 	RegisterClassEx(&wndClass);
 
-	hWnd = CreateWindow(lpszClass, lpszWindowName, WS_OVERLAPPEDWINDOW|WS_HSCROLL|WS_VSCROLL|WS_THICKFRAME, 0, 0, 1280, 800, NULL, (HMENU)NULL, hInstance, NULL);
+	hWnd = CreateWindow(
+		lpszClass,
+		lpszWindowName,
+		WS_OVERLAPPEDWINDOW,
+		0, 0,
+		900, 750,
+		NULL,
+		(HMENU)NULL,
+		hInstance,
+		NULL);
 	ShowWindow(hWnd, nCmdShow);
 	UpdateWindow(hWnd);
 
@@ -43,13 +52,17 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hDC;
-	TCHAR temp[] = TEXT("Hellow World");
-	int x = 0, y = 0;
 
 	switch (iMessage) {
 	case WM_PAINT:
 		hDC = BeginPaint(hWnd, &ps);
-		TextOut(hDC, x, y, temp, lstrlen(temp));
+
+		TextOut(hDC, 0, 0, L"Left-top (0, 0)", strlen("Left-top (0,0)"));
+		TextOut(hDC, 700, 0, L"Right-top (700, 0)", strlen("Right-top (700, 0)"));
+		TextOut(hDC, 0, 650, L"Left-bottom (0, 650)", strlen("Left-bottom (0, 650)"));
+		TextOut(hDC, 700, 650, L"Right-bottom (700, 650)", strlen("Right-bottom (700, 650)"));
+		TextOut(hDC, 350, 300, L"Center (350, 300)", strlen("Center (350, 600)"));
+
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_DESTROY:
