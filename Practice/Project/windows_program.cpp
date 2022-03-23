@@ -4,13 +4,13 @@
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
-LPCTSTR lpszWindowName = L"Windows program 2_2";
+LPCTSTR lpszWindowName = L"Windows program 2_3";
 
 std::default_random_engine dre;
 std::uniform_int_distribution<int> uid_x{ 0, 700 };
-std::uniform_int_distribution<int> uid_y{ 0, 500 };
+std::uniform_int_distribution<int> uid_y{ 0, 400 };
 std::uniform_int_distribution<int> uid_n{ 0, 9 };
-std::uniform_int_distribution<int> uid_count{ 20, 100 };
+std::uniform_int_distribution<int> uid_count{ 5, 10 };
 std::uniform_int_distribution<int> uid_color{ 0, 700 };
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
@@ -63,25 +63,32 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 	int x = uid_x(dre);
 	int y = uid_y(dre);
-	RECT rect{ x, y, x + 100, y + 100 };
-
 	int n = uid_n(dre);
 	int count = uid_count(dre);
+	int line = 16;
 
-	TCHAR str[100];
+	RECT rect{ x, y, x + 100, y + 100 };
+
+	TCHAR str[101];
 
 	for (int i = 0; i < count; ++i)
 	{
 		str[i] = n + '0';
 	}
-	
+	str[count] = '\0';
+
+
 	switch (iMessage) {
 	case WM_PAINT:
 		hDC = BeginPaint(hWnd, &ps);
 
 		SetBkColor(hDC, RGB(uid_color(dre), uid_color(dre), uid_color(dre)));
 		SetTextColor(hDC, RGB(uid_color(dre), uid_color(dre), uid_color(dre)));
-		DrawText(hDC, str, count, &rect, DT_LEFT | DT_TOP | DT_WORDBREAK | DT_EDITCONTROL);
+		
+		for (int i = 0; i < count; ++i)
+		{
+			TextOut(hDC, x, y + line * i, str, lstrlen(str));
+		}
 
 		EndPaint(hWnd, &ps);
 		break;
