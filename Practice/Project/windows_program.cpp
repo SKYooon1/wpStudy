@@ -54,14 +54,13 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	PAINTSTRUCT ps;
 	HDC hDC;
 	static SIZE size;
-	static TCHAR str[10][30];
+	static TCHAR str[10][80];
 	static int count[10]{};
 	static int yLin{};
+	static bool flagUpper{};
 
-
-	// 메시지 처리하기
 	switch (iMessage)
-	{										// 메시지 번호
+	{
 	case WM_CREATE:
 		CreateCaret(hWnd, NULL, 5, 15);
 		ShowCaret(hWnd);
@@ -72,31 +71,64 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		{
 			TextOut(hDC, 0, 0 + (i * 20), str[i], lstrlen(str[i]));
 		}
-		GetTextExtentPoint32(hDC, str[yLin], lstrlen(str[yLin]), &size);
+		GetTextExtentPoint32(hDC, str[yLin], count[yLin], &size);
 		SetCaretPos(size.cx, 0 + (20 * yLin));
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_KEYDOWN:
-		if (wParam == VK_LEFT)
+		switch (wParam)
 		{
+		case VK_LEFT:
 			if (count[yLin] > 0)
 				--count[yLin];
+			break;
+		case VK_UP:
+			if (yLin > 0)
+				--yLin;
+			break;
+		case VK_RIGHT:
+			if (count[yLin] < lstrlen(str[yLin]))
+				++count[yLin];
+			break;
+		case VK_DOWN:
+			if (yLin < 10)
+				++yLin;
+			break;
+		case VK_F1:
+			flagUpper = !flagUpper;
+			break;
+		case VK_DELETE:
+			if (count[yLin] < lstrlen(str[yLin]))
+			{
+				str[yLin][++count[yLin]] = 0;
+			}
+			break;
+		case VK_HOME:
+			count[yLin] = 0;
+			break;
+		case VK_END:
+			while (str[yLin][count[yLin]] != 0)
+				++count[yLin];
+			break;
 		}
+		InvalidateRect(hWnd, NULL, TRUE);
 		break;
-	case WM_CHAR:							// 메시지에 따라 처리
+	case WM_CHAR:
 		hDC = GetDC(hWnd);
-		if (wParam == VK_BACK)
+		switch (wParam)
 		{
+		case VK_BACK:
 			if (count[yLin] > 0)
-				--count[yLin];
+			{
+				str[yLin][--count[yLin]] = 0;
+			}
 			else
 			{
 				if (yLin != 0)
 					--yLin;
 			}
-		}
-		else if (wParam == VK_RETURN)
-		{
+			break;
+		case VK_RETURN:
 			str[yLin][count[yLin]] = '\0';
 			++yLin;
 			if (yLin == 10)
@@ -105,32 +137,44 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				for (int i = 0; i < 10; ++i)
 					count[i] = 0;
 			}
-		}
-		else if (wParam == VK_ESCAPE)
-		{
+			break;
+		case VK_ESCAPE:
 			for (int i = 0; i < 10; ++i)
 			{
-				for (int j = 0; j < 30; ++j)
+				for (int j = 0; j < 80; ++j)
 					str[i][j] = 0;
 				count[i] = 0;
 			}
 			yLin = 0;
-		}
-		else if (wParam == VK_TAB)
-		{
+			break;
+		case VK_TAB:
 			for (int i = 0; i < 4; ++i)
 				str[yLin][count[yLin]++] = ' ';
 			str[yLin][count[yLin]] = '\0';
+			break;
+		default:
+			if (count[yLin] == 79)
+			{
+				str[yLin][count[yLin]] = '\0';
+				++yLin;
+			}
+			else if (flagUpper)
+			{
+				str[yLin][count[yLin]++] = toupper(wParam);
+			}
+			else
+			{
+				str[yLin][count[yLin]++] = wParam;
+			}
+			break;
 		}
-		else
-			str[yLin][count[yLin]++] = wParam;
 		InvalidateRect(hWnd, NULL, TRUE);
 		break;
-	case WM_DESTROY:						// 메시지에 따라 처리
+	case WM_DESTROY:
 		HideCaret(hWnd);
 		DestroyCaret();
 		PostQuitMessage(0);
 		break;
-	}										// 처리할 메시지만 case문에 나열
+	}
 	return DefWindowProc(hWnd, iMessage, wParam, lParam);
 }
