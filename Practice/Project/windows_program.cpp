@@ -4,7 +4,7 @@
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
-LPCTSTR lpszWindowName = L"Windows program 2_3";
+LPCTSTR lpszWindowName = L"Windows program 2_5";
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
@@ -53,124 +53,84 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hDC;
-	HBRUSH hBrush, oldBrush;
-	RECT rect = { 0, 0, 800, 600 };
-	POINT point7[14]{};
-	POINT point5[10]{};
-	POINT point4[8]{};
+	static SIZE size;
+	static TCHAR str[10][30];
+	static int count[10]{};
+	static int yLin{};
 
-	srand((unsigned int)time(0));
-	int iSize, iShape;
-	iSize = rand() % 9 + 2;
 
-	switch (iMessage) {
+	// 메시지 처리하기
+	switch (iMessage)
+	{										// 메시지 번호
+	case WM_CREATE:
+		CreateCaret(hWnd, NULL, 5, 15);
+		ShowCaret(hWnd);
+		break;
 	case WM_PAINT:
 		hDC = BeginPaint(hWnd, &ps);
-
-		for (int i = 0; i < iSize; ++i)
+		for (int i = 0; i < 10; ++i)
 		{
-			for (int j = 0; j < iSize; ++j)
-			{
-				iShape = rand() % 6;
-				rect.left = i * 800 / iSize;
-				rect.top = j * 600 / iSize;
-				rect.right = (i + 1) * 800 / iSize;
-				rect.bottom = (j + 1) * 600 / iSize;
-
-				switch (iShape)
-				{
-				case 0:
-					MoveToEx(hDC, rect.left, rect.top, NULL);
-					LineTo(hDC, rect.right, rect.bottom);
-
-					MoveToEx(hDC, rect.right, rect.top, NULL);
-					LineTo(hDC, rect.left, rect.bottom);
-					break;
-				case 1:
-					hBrush = CreateSolidBrush(RGB(0, 0, 0));
-					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-
-					point7[0] = { rect.left, rect.top };
-					point7[1] = { rect.right, rect.top };
-					point7[2] = { rect.left / 2 + rect.right / 2, rect.top / 2 + rect.bottom / 2 };
-					point7[3] = { rect.right, rect.bottom };
-					point7[4] = { rect.left, rect.bottom };
-					point7[5] = { rect.left / 2 + rect.right / 2, rect.top / 2 + rect.bottom / 2 };
-					point7[6] = { rect.left, rect.top };
-
-					Polygon(hDC, point7, 7);
-
-					SelectObject(hDC, oldBrush);
-					DeleteObject(hBrush);
-					break;
-				case 2:
-					hBrush = CreateSolidBrush(RGB(0, 0, 0));
-					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-
-					point7[0] = { rect.left, rect.top };
-					point7[1] = { rect.left, rect.bottom };
-					point7[2] = { rect.left / 2 + rect.right / 2, rect.top / 2 + rect.bottom / 2 };
-					point7[3] = { rect.right, rect.bottom };
-					point7[4] = { rect.right, rect.top };
-					point7[5] = { rect.left / 2 + rect.right / 2, rect.top / 2 + rect.bottom / 2 };
-					point7[6] = { rect.left, rect.top };
-
-					Polygon(hDC, point7, 7);
-					
-					SelectObject(hDC, oldBrush);
-					DeleteObject(hBrush);
-					break;
-				case 3:
-					hBrush = CreateSolidBrush(RGB(0, 0, 0));
-					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-
-					point5[0] = { rect.left / 2 + rect.right / 2, rect.top };
-					point5[1] = { rect.right, rect.top / 2 + rect.bottom / 2 };
-					point5[2] = { rect.left / 2 + rect.right / 2, rect.bottom };
-					point5[3] = { rect.left, rect.top / 2 + rect.bottom / 2 };
-					point5[4] = { rect.left / 2 + rect.right / 2, rect.top };
-
-					Polygon(hDC, point5, 5);
-
-					SelectObject(hDC, oldBrush);
-					DeleteObject(hBrush);
-					break;
-				case 4:
-					hBrush = CreateSolidBrush(RGB(0, 0, 0));
-					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-
-					point4[0] = { rect.left, rect.top };
-					point4[1] = { rect.right, rect.top};
-					point4[2] = { rect.left / 2 + rect.right / 2, rect.bottom };
-					point4[3] = { rect.left, rect.top };
-
-					Polygon(hDC, point4, 4);
-
-					SelectObject(hDC, oldBrush);
-					DeleteObject(hBrush);
-					break;
-				case 5:
-					hBrush = CreateSolidBrush(RGB(0, 0, 0));
-					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-
-					FillRect(hDC, &rect, hBrush);
-
-					SelectObject(hDC, oldBrush);
-					DeleteObject(hBrush);
-					break;
-				}
-			}
+			TextOut(hDC, 0, 0 + (i * 20), str[i], lstrlen(str[i]));
 		}
+		GetTextExtentPoint32(hDC, str[yLin], lstrlen(str[yLin]), &size);
+		SetCaretPos(size.cx, 0 + (20 * yLin));
+		EndPaint(hWnd, &ps);
 		break;
 	case WM_KEYDOWN:
-		if (wParam == VK_ESCAPE)
+		if (wParam == VK_LEFT)
 		{
-			PostQuitMessage(0);
-			return 0;
+			if (count[yLin] > 0)
+				--count[yLin];
 		}
-	case WM_DESTROY:
+		break;
+	case WM_CHAR:							// 메시지에 따라 처리
+		hDC = GetDC(hWnd);
+		if (wParam == VK_BACK)
+		{
+			if (count[yLin] > 0)
+				--count[yLin];
+			else
+			{
+				if (yLin != 0)
+					--yLin;
+			}
+		}
+		else if (wParam == VK_RETURN)
+		{
+			str[yLin][count[yLin]] = '\0';
+			++yLin;
+			if (yLin == 10)
+			{
+				yLin = 0;
+				for (int i = 0; i < 10; ++i)
+					count[i] = 0;
+			}
+		}
+		else if (wParam == VK_ESCAPE)
+		{
+			for (int i = 0; i < 10; ++i)
+			{
+				for (int j = 0; j < 30; ++j)
+					str[i][j] = 0;
+				count[i] = 0;
+			}
+			yLin = 0;
+		}
+		else if (wParam == VK_TAB)
+		{
+			for (int i = 0; i < 4; ++i)
+				str[yLin][count[yLin]++] = ' ';
+			str[yLin][count[yLin]] = '\0';
+		}
+		else
+			str[yLin][count[yLin]++] = wParam;
+		InvalidateRect(hWnd, NULL, TRUE);
+		break;
+	case WM_DESTROY:						// 메시지에 따라 처리
+		HideCaret(hWnd);
+		DestroyCaret();
 		PostQuitMessage(0);
-		return 0;
-	}
-	return (DefWindowProc(hWnd, iMessage, wParam, lParam));
+		break;
+	}										// 처리할 메시지만 case문에 나열
+	return DefWindowProc(hWnd, iMessage, wParam, lParam);
 }
