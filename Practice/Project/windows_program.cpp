@@ -6,13 +6,6 @@ HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
 LPCTSTR lpszWindowName = L"Windows program 2_3";
 
-std::default_random_engine dre;
-std::uniform_int_distribution<int> uid_x{ 0, 700 };
-std::uniform_int_distribution<int> uid_y{ 0, 400 };
-std::uniform_int_distribution<int> uid_n{ 0, 9 };
-std::uniform_int_distribution<int> uid_count{ 5, 10 };
-std::uniform_int_distribution<int> uid_color{ 0, 700 };
-
 LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdParam, int nCmdShow)
@@ -60,37 +53,114 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hDC;
+	HBRUSH hBrush, oldBrush;
+	RECT rect = { 0, 0, 800, 600 };
+	POINT point7[14]{};
+	POINT point5[10]{};
+	POINT point4[8]{};
 
-	int x = uid_x(dre);
-	int y = uid_y(dre);
-	int n = uid_n(dre);
-	int count = uid_count(dre);
-	int line = 16;
-
-	RECT rect{ x, y, x + 100, y + 100 };
-
-	TCHAR str[101];
-
-	for (int i = 0; i < count; ++i)
-	{
-		str[i] = n + '0';
-	}
-	str[count] = '\0';
-
+	srand((unsigned int)time(0));
+	int iSize, iShape;
+	iSize = rand() % 9 + 2;
 
 	switch (iMessage) {
 	case WM_PAINT:
 		hDC = BeginPaint(hWnd, &ps);
 
-		SetBkColor(hDC, RGB(uid_color(dre), uid_color(dre), uid_color(dre)));
-		SetTextColor(hDC, RGB(uid_color(dre), uid_color(dre), uid_color(dre)));
-		
-		for (int i = 0; i < count; ++i)
+		for (int i = 0; i < iSize; ++i)
 		{
-			TextOut(hDC, x, y + line * i, str, lstrlen(str));
-		}
+			for (int j = 0; j < iSize; ++j)
+			{
+				iShape = rand() % 6;
+				rect.left = i * 800 / iSize;
+				rect.top = j * 600 / iSize;
+				rect.right = (i + 1) * 800 / iSize;
+				rect.bottom = (j + 1) * 600 / iSize;
 
-		EndPaint(hWnd, &ps);
+				switch (iShape)
+				{
+				case 0:
+					MoveToEx(hDC, rect.left, rect.top, NULL);
+					LineTo(hDC, rect.right, rect.bottom);
+
+					MoveToEx(hDC, rect.right, rect.top, NULL);
+					LineTo(hDC, rect.left, rect.bottom);
+					break;
+				case 1:
+					hBrush = CreateSolidBrush(RGB(0, 0, 0));
+					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+
+					point7[0] = { rect.left, rect.top };
+					point7[1] = { rect.right, rect.top };
+					point7[2] = { rect.left / 2 + rect.right / 2, rect.top / 2 + rect.bottom / 2 };
+					point7[3] = { rect.right, rect.bottom };
+					point7[4] = { rect.left, rect.bottom };
+					point7[5] = { rect.left / 2 + rect.right / 2, rect.top / 2 + rect.bottom / 2 };
+					point7[6] = { rect.left, rect.top };
+
+					Polygon(hDC, point7, 7);
+
+					SelectObject(hDC, oldBrush);
+					DeleteObject(hBrush);
+					break;
+				case 2:
+					hBrush = CreateSolidBrush(RGB(0, 0, 0));
+					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+
+					point7[0] = { rect.left, rect.top };
+					point7[1] = { rect.left, rect.bottom };
+					point7[2] = { rect.left / 2 + rect.right / 2, rect.top / 2 + rect.bottom / 2 };
+					point7[3] = { rect.right, rect.bottom };
+					point7[4] = { rect.right, rect.top };
+					point7[5] = { rect.left / 2 + rect.right / 2, rect.top / 2 + rect.bottom / 2 };
+					point7[6] = { rect.left, rect.top };
+
+					Polygon(hDC, point7, 7);
+					
+					SelectObject(hDC, oldBrush);
+					DeleteObject(hBrush);
+					break;
+				case 3:
+					hBrush = CreateSolidBrush(RGB(0, 0, 0));
+					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+
+					point5[0] = { rect.left / 2 + rect.right / 2, rect.top };
+					point5[1] = { rect.right, rect.top / 2 + rect.bottom / 2 };
+					point5[2] = { rect.left / 2 + rect.right / 2, rect.bottom };
+					point5[3] = { rect.left, rect.top / 2 + rect.bottom / 2 };
+					point5[4] = { rect.left / 2 + rect.right / 2, rect.top };
+
+					Polygon(hDC, point5, 5);
+
+					SelectObject(hDC, oldBrush);
+					DeleteObject(hBrush);
+					break;
+				case 4:
+					hBrush = CreateSolidBrush(RGB(0, 0, 0));
+					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+
+					point4[0] = { rect.left, rect.top };
+					point4[1] = { rect.right, rect.top};
+					point4[2] = { rect.left / 2 + rect.right / 2, rect.bottom };
+					point4[3] = { rect.left, rect.top };
+
+					Polygon(hDC, point4, 4);
+
+					SelectObject(hDC, oldBrush);
+					DeleteObject(hBrush);
+					break;
+				case 5:
+					hBrush = CreateSolidBrush(RGB(0, 0, 0));
+					oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+
+					FillRect(hDC, &rect, hBrush);
+
+					SelectObject(hDC, oldBrush);
+					DeleteObject(hBrush);
+					break;
+				}
+			}
+		}
 		break;
 	case WM_KEYDOWN:
 		if (wParam == VK_ESCAPE)
