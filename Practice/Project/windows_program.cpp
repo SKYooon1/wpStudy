@@ -49,35 +49,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 
+struct Space
+{
+	RECT rect{};
+	int rgb[3]{};
+	int loc{};
+};
+
 LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hDC;
 	HBRUSH hBrush, oldBrush;
 
-	static RECT rRec{ 280,200,500,350 };
-	static RECT rTri{ 30,200,250,350 };
-	static RECT rHrg{ 530,200,750,350 };
-	static RECT rPen{ 280, 20,500,170 };
-	static RECT rPie{ 280,380,500,530 };
-	static int rgbRec[6]{}, rgbTri[6]{ 255,0,0 }, rgbHrg[6]{ 0,255,0 },
-		rgbPen[6]{ 0,0,255 }, rgbPie[6]{ 255,255,0 };
-
-	RECT temp;
-	POINT pTri[3]{ {(rTri.left / 2) + (rTri.right / 2),rTri.top},
-		{rTri.left,rTri.bottom},{rTri.right,rTri.bottom} };
-	POINT pHrg[6]{ {rHrg.left,rHrg.top},
-		{rHrg.left + ((rHrg.right - rHrg.left) / 2),
-		rHrg.top + ((rHrg.bottom - rHrg.top) / 2)},
-		{ rHrg.left,rHrg.bottom },{ rHrg.right,rHrg.bottom },
-		{rHrg.left + ((rHrg.right - rHrg.left) / 2),
-		rHrg.top + ((rHrg.bottom - rHrg.top) / 2)},
-		{rHrg.right,rHrg.top} };
-	POINT pPen[5]{ {rPen.left + ((rPen.right - rPen.left) / 2),rPen.top},
-		{rPen.left,rPen.top + ((rPen.bottom - rPen.top) * 2 / 5)},
-		{rPen.left + ((rPen.right - rPen.left) / 5),rPen.bottom},
-		{rPen.left + ((rPen.right - rPen.left) * 4 / 5),rPen.bottom},
-		{rPen.right,rPen.top + ((rPen.bottom - rPen.top) * 2 / 5)} };
+	static RECT rClient{};
+	static RECT rect[15][15]{};
+	static RECT rText{};
+	static Space sBlock[20]{};
+	static Space sChange[20]{};
+	static Space sUser[2]{};
+	static int idx[225]{};
+	static bool bTurn{};
+	static bool err{};
+	TCHAR erText[] = _T(
+		"해당 방향으로 움직일 수 없습니다. 다시 시도해주세요.");
+	TCHAR er1Text[] = _T("1번 유저의 차례입니다. 다시 시도해주세요.");
+	TCHAR er2Text[] = _T("2번 유저의 차례입니다. 다시 시도해주세요.");
 
 	srand((unsigned int)time(0));
 
@@ -85,42 +82,111 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	switch (iMessage)
 	{										// 메시지 번호
 	case WM_CREATE:							// 메시지에 따라 처리
-		InvalidateRect(hWnd, NULL, true);
+		GetClientRect(hWnd, &rClient);
+		rText = {
+			rClient.left, rClient.bottom - 20,
+			rClient.right, rClient.bottom
+		};
+		for (int i = 0; i < 15; ++i)
+		{
+			for (int j = 0; j < 15; ++j)
+			{
+				rect[i][j] = {
+					j * (rClient.right / 15),
+					i * ((rClient.bottom - 20) / 15),
+					(j + 1) * (rClient.right / 15),
+					(i + 1) * ((rClient.bottom - 20) / 15)
+				};
+			}
+		}
+
+		for (int i = 0; i < 225; ++i)
+			idx[i] = i;
+		int iTemp, idx1, idx2;
+		for (int i = 0; i < 1000; ++i)
+		{
+			idx1 = rand() % 225;
+			idx2 = rand() % 225;
+
+			iTemp = idx[idx1];
+			idx[idx1] = idx[idx2];
+			idx[idx2] = iTemp;
+		}
+
+		for (int i = 0; i < 20; ++i)
+		{
+			sBlock[i].loc = idx[i];
+			sBlock[i].rect = {
+				rect[sBlock[i].loc / 15][sBlock[i].loc % 15].left,
+				rect[sBlock[i].loc / 15][sBlock[i].loc % 15].top,
+				rect[sBlock[i].loc / 15][sBlock[i].loc % 15].right,
+				rect[sBlock[i].loc / 15][sBlock[i].loc % 15].bottom };
+			sChange[i].loc = idx[i + 20];
+			sChange[i].rect = {
+				rect[sChange[i].loc / 15][sChange[i].loc % 15].left,
+				rect[sChange[i].loc / 15][sChange[i].loc % 15].top,
+				rect[sChange[i].loc / 15][sChange[i].loc % 15].right,
+				rect[sChange[i].loc / 15][sChange[i].loc % 15].bottom };
+			sChange[i].rgb[0] = rand() % (10 * (i + 1)) + rand() % (256 - (10 * (i + 1)));
+			sChange[i].rgb[1] = rand() % (11 * (i + 1)) + rand() % (256 - (11 * (i + 1)));
+			sChange[i].rgb[2] = rand() % (12 * (i + 1)) + rand() % (256 - (12 * (i + 1)));
+		}
+
+		for (int i = 0; i < 2; ++i)
+		{
+			sUser[i].loc = idx[i + 40];
+			sUser[i].rect = {
+				rect[sUser[i].loc / 15][sUser[i].loc % 15].left,
+				rect[sUser[i].loc / 15][sUser[i].loc % 15].top,
+				rect[sUser[i].loc / 15][sUser[i].loc % 15].right,
+				rect[sUser[i].loc / 15][sUser[i].loc % 15].bottom };
+		}
+		for (int i = 0; i < 3; ++i)
+			sUser[1].rgb[i] = 255;
+
 		break;
 	case WM_PAINT:
 		hDC = BeginPaint(hWnd, &ps);
 
-		hBrush = CreateSolidBrush(RGB(rgbRec[0], rgbRec[1], rgbRec[2]));
-		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-		Rectangle(hDC, rRec.left, rRec.top, rRec.right, rRec.bottom);
-		SelectObject(hDC, oldBrush);
-		DeleteObject(hBrush);
+		for (int i = 0; i < 15; ++i)
+		{
+			for (int j = 0; j < 15; ++j)
+			{
+				Rectangle(hDC, rect[i][j].left, rect[i][j].top,
+					rect[i][j].right, rect[i][j].bottom);
+			}
+		}
 
-		hBrush = CreateSolidBrush(RGB(rgbTri[0], rgbTri[1], rgbTri[2]));
-		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-		Polygon(hDC, pTri, 3);
-		SelectObject(hDC, oldBrush);
-		DeleteObject(hBrush);
+		for (int i = 0; i < 20; ++i)
+		{
+			hBrush = CreateSolidBrush(RGB(255, 0, 0));
+			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+			Rectangle(hDC, sBlock[i].rect.left, sBlock[i].rect.top,
+				sBlock[i].rect.right, sBlock[i].rect.bottom);
+			SelectObject(hDC, oldBrush);
+			DeleteObject(hBrush);
 
-		hBrush = CreateSolidBrush(RGB(rgbHrg[0], rgbHrg[1], rgbHrg[2]));
-		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-		Polygon(hDC, pHrg, 6);
-		SelectObject(hDC, oldBrush);
-		DeleteObject(hBrush);
+			hBrush = CreateSolidBrush(RGB(sChange[i].rgb[0],
+				sChange[i].rgb[1], sChange[i].rgb[2]));
+			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+			Rectangle(hDC, sChange[i].rect.left, sChange[i].rect.top,
+				sChange[i].rect.right, sChange[i].rect.bottom);
+			SelectObject(hDC, oldBrush);
+			DeleteObject(hBrush);
+		}
 
-		hBrush = CreateSolidBrush(RGB(rgbPen[0], rgbPen[1], rgbPen[2]));
-		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-		Polygon(hDC, pPen, 5);
-		SelectObject(hDC, oldBrush);
-		DeleteObject(hBrush);
-
-		hBrush = CreateSolidBrush(RGB(rgbPie[0], rgbPie[1], rgbPie[2]));
-		oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-		Pie(hDC, rPie.left, rPie.top, rPie.right, rPie.bottom,
-			rPie.left + ((rPie.right - rPie.left) / 2), rPie.top, rPie.right,
-			rPie.top + ((rPie.bottom - rPie.top) / 2));
-		SelectObject(hDC, oldBrush);
-		DeleteObject(hBrush);
+		for (int i = 0; i < 2; ++i)
+		{
+			hBrush = CreateSolidBrush(RGB(sUser[i].rgb[0],
+				sUser[i].rgb[1], sUser[i].rgb[2]));
+			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
+			Ellipse(hDC, sUser[i].rect.left,
+				sUser[i].rect.top,
+				sUser[i].rect.right,
+				sUser[i].rect.bottom);
+			SelectObject(hDC, oldBrush);
+			DeleteObject(hBrush);
+		}
 
 		EndPaint(hWnd, &ps);
 		break;
@@ -129,128 +195,373 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		switch (wParam)
 		{
-		case 't':
-		case 'T':
-			rgbTri[3] = rand() % 10 + rand() % 247;
-			rgbTri[4] = rand() % 20 + rand() % 237;
-			rgbTri[5] = rand() % 30 + rand() % 227;
-			hBrush = CreateSolidBrush(RGB(rgbTri[3], rgbTri[4], rgbTri[5]));
-			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-			Polygon(hDC, pTri, 3);
-			SelectObject(hDC, oldBrush);
-			DeleteObject(hBrush);
+		case 'q':
+		case 'Q':
+			PostQuitMessage(0);
+			break;
+		case 'r':
+		case 'R':
+			for (int i = 0; i < 225; ++i)
+				idx[i] = i;
+			int iTemp, idx1, idx2;
+			for (int i = 0; i < 1000; ++i)
+			{
+				idx1 = rand() % 225;
+				idx2 = rand() % 225;
+
+				iTemp = idx[idx1];
+				idx[idx1] = idx[idx2];
+				idx[idx2] = iTemp;
+			}
+
+			for (int i = 0; i < 20; ++i)
+			{
+				sBlock[i].loc = idx[i];
+				sBlock[i].rect = {
+					rect[sBlock[i].loc / 15][sBlock[i].loc % 15].left,
+					rect[sBlock[i].loc / 15][sBlock[i].loc % 15].top,
+					rect[sBlock[i].loc / 15][sBlock[i].loc % 15].right,
+					rect[sBlock[i].loc / 15][sBlock[i].loc % 15].bottom };
+				sChange[i].loc = idx[i + 20];
+				sChange[i].rect = {
+					rect[sChange[i].loc / 15][sChange[i].loc % 15].left,
+					rect[sChange[i].loc / 15][sChange[i].loc % 15].top,
+					rect[sChange[i].loc / 15][sChange[i].loc % 15].right,
+					rect[sChange[i].loc / 15][sChange[i].loc % 15].bottom };
+				sChange[i].rgb[0] = rand() % (10 * (i + 1)) + rand() % (256 - (10 * (i + 1)));
+				sChange[i].rgb[1] = rand() % (11 * (i + 1)) + rand() % (256 - (11 * (i + 1)));
+				sChange[i].rgb[2] = rand() % (12 * (i + 1)) + rand() % (256 - (12 * (i + 1)));
+			}
+
+			for (int i = 0; i < 2; ++i)
+			{
+				sUser[i].loc = idx[i + 40];
+				sUser[i].rect = {
+					rect[sUser[i].loc / 15][sUser[i].loc % 15].left,
+					rect[sUser[i].loc / 15][sUser[i].loc % 15].top,
+					rect[sUser[i].loc / 15][sUser[i].loc % 15].right,
+					rect[sUser[i].loc / 15][sUser[i].loc % 15].bottom };
+			}
+			for (int i = 0; i < 3; ++i)
+				sUser[1].rgb[i] = 255;
+
+			InvalidateRect(hWnd, NULL, true);
+			break;
+		case 'w':
+		case 'W':
+			if (bTurn == 0)
+			{
+				for (int i = 0; i < 20; ++i)
+					if (sUser[0].loc - 15 == sBlock[i].loc)
+					{
+						DrawText(hDC, erText, _tcslen(erText), &rText,
+							DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+						++err;
+						break;
+					}
+				if (err == 1)
+					err = 0;
+				else if (sUser[0].loc < 15)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else if (sUser[0].loc - 15 == sUser[1].loc)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else
+				{
+					for (int i = 0; i < 20; ++i)
+						if (sUser[0].loc - 15 == sChange[i].loc)
+						{
+							sUser[0].rgb[0] = sChange[i].rgb[0];
+							sUser[0].rgb[1] = sChange[i].rgb[1];
+							sUser[0].rgb[2] = sChange[i].rgb[2];
+						}
+					sUser[0].loc -= 15;
+					sUser[0].rect = rect[sUser[0].loc / 15][sUser[0].loc % 15];
+					bTurn = 1;
+					InvalidateRect(hWnd, NULL, true);
+				}
+			}
+			else
+				DrawText(hDC, er2Text, _tcslen(er2Text), &rText,
+					DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 			break;
 		case 's':
 		case 'S':
-			rgbHrg[3] = rand() % 40 + rand() % 217;
-			rgbHrg[4] = rand() % 50 + rand() % 207;
-			rgbHrg[5] = rand() % 60 + rand() % 197;
-			hBrush = CreateSolidBrush(RGB(rgbHrg[3], rgbHrg[4], rgbHrg[5]));
-			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-			Polygon(hDC, pHrg, 6);
-			SelectObject(hDC, oldBrush);
-			DeleteObject(hBrush);
+			if (bTurn == 0)
+			{
+				for (int i = 0; i < 20; ++i)
+					if (sUser[0].loc + 15 == sBlock[i].loc)
+					{
+						DrawText(hDC, erText, _tcslen(erText), &rText,
+							DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+						++err;
+						break;
+					}
+				if (err == 1)
+					err = 0;
+				else if (sUser[0].loc > 209)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else if (sUser[0].loc + 15 == sUser[1].loc)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else
+				{
+					for (int i = 0; i < 20; ++i)
+						if (sUser[0].loc + 15 == sChange[i].loc)
+						{
+							sUser[0].rgb[0] = sChange[i].rgb[0];
+							sUser[0].rgb[1] = sChange[i].rgb[1];
+							sUser[0].rgb[2] = sChange[i].rgb[2];
+						}
+					sUser[0].loc += 15;
+					sUser[0].rect = rect[sUser[0].loc / 15][sUser[0].loc % 15];
+					bTurn = 1;
+					InvalidateRect(hWnd, NULL, true);
+				}
+			}
+			else
+				DrawText(hDC, er2Text, _tcslen(er2Text), &rText,
+					DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 			break;
-		case 'p':
-		case 'P':
-			rgbPen[3] = rand() % 70 + rand() % 187;
-			rgbPen[4] = rand() % 80 + rand() % 177;
-			rgbPen[5] = rand() % 90 + rand() % 167;
-			hBrush = CreateSolidBrush(RGB(rgbPen[3], rgbPen[4], rgbPen[5]));
-			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-			Polygon(hDC, pPen, 5);
-			SelectObject(hDC, oldBrush);
-			DeleteObject(hBrush);
+		case 'a':
+		case 'A':
+			if (bTurn == 0)
+			{
+				for (int i = 0; i < 20; ++i)
+					if (sUser[0].loc - 1 == sBlock[i].loc)
+					{
+						DrawText(hDC, erText, _tcslen(erText), &rText,
+							DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+						++err;
+						break;
+					}
+				if (err == 1)
+					err = 0;
+				else if (sUser[0].loc % 15 == 0)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else if (sUser[0].loc - 1 == sUser[1].loc)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else
+				{
+					for (int i = 0; i < 20; ++i)
+						if (sUser[0].loc - 1 == sChange[i].loc)
+						{
+							sUser[0].rgb[0] = sChange[i].rgb[0];
+							sUser[0].rgb[1] = sChange[i].rgb[1];
+							sUser[0].rgb[2] = sChange[i].rgb[2];
+						}
+					--sUser[0].loc;
+					sUser[0].rect = rect[sUser[0].loc / 15][sUser[0].loc % 15];
+					bTurn = 1;
+					InvalidateRect(hWnd, NULL, true);
+				}
+			}
+			else
+				DrawText(hDC, er2Text, _tcslen(er2Text), &rText,
+					DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 			break;
-		case 'e':
-		case 'E':
-			rgbPie[3] = rand() % 100 + rand() % 157;
-			rgbPie[4] = rand() % 110 + rand() % 147;
-			rgbPie[5] = rand() % 120 + rand() % 137;
-			hBrush = CreateSolidBrush(RGB(rgbPie[3], rgbPie[4], rgbPie[5]));
-			oldBrush = (HBRUSH)SelectObject(hDC, hBrush);
-			Pie(hDC, rPie.left, rPie.top, rPie.right, rPie.bottom,
-				rPie.left + ((rPie.right - rPie.left) / 2), rPie.top, rPie.right,
-				rPie.top + ((rPie.bottom - rPie.top) / 2));
-			SelectObject(hDC, oldBrush);
-			DeleteObject(hBrush);
+		case 'd':
+		case 'D':
+			if (bTurn == 0)
+			{
+				for (int i = 0; i < 20; ++i)
+					if (sUser[0].loc + 1 == sBlock[i].loc)
+					{
+						DrawText(hDC, erText, _tcslen(erText), &rText,
+							DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+						++err;
+						break;
+					}
+				if (err == 1)
+					err = 0;
+				else if (sUser[0].loc % 15 == 14)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else if (sUser[0].loc + 1 == sUser[1].loc)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else
+				{
+					for (int i = 0; i < 20; ++i)
+						if (sUser[0].loc + 1 == sChange[i].loc)
+						{
+							sUser[0].rgb[0] = sChange[i].rgb[0];
+							sUser[0].rgb[1] = sChange[i].rgb[1];
+							sUser[0].rgb[2] = sChange[i].rgb[2];
+						}
+					++sUser[0].loc;
+					sUser[0].rect = rect[sUser[0].loc / 15][sUser[0].loc % 15];
+					bTurn = 1;
+					InvalidateRect(hWnd, NULL, true);
+				}
+			}
+			else
+				DrawText(hDC, er2Text, _tcslen(er2Text), &rText,
+					DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 			break;
-		case 'Q':
-		case 'q':
-			PostQuitMessage(0);
+		case 'i':
+		case 'I':
+			if (bTurn == 1)
+			{
+				for (int i = 0; i < 20; ++i)
+					if (sUser[1].loc - 15 == sBlock[i].loc)
+					{
+						DrawText(hDC, erText, _tcslen(erText), &rText,
+							DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+						++err;
+						break;
+					}
+				if (err == 1)
+					err = 0;
+				else if (sUser[1].loc < 15)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else if (sUser[1].loc - 15 == sUser[0].loc)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else
+				{
+					for (int i = 0; i < 20; ++i)
+						if (sUser[1].loc - 15 == sChange[i].loc)
+						{
+							sUser[1].rgb[0] = sChange[i].rgb[0];
+							sUser[1].rgb[1] = sChange[i].rgb[1];
+							sUser[1].rgb[2] = sChange[i].rgb[2];
+						}
+					sUser[1].loc -= 15;
+					sUser[1].rect = rect[sUser[1].loc / 15][sUser[1].loc % 15];
+					bTurn = 0;
+					InvalidateRect(hWnd, NULL, true);
+				}
+			}
+			else
+				DrawText(hDC, er1Text, _tcslen(er1Text), &rText,
+					DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+			break;
+		case 'k':
+		case 'K':
+			if (bTurn == 1)
+			{
+				for (int i = 0; i < 20; ++i)
+					if (sUser[1].loc + 15 == sBlock[i].loc)
+					{
+						DrawText(hDC, erText, _tcslen(erText), &rText,
+							DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+						++err;
+						break;
+					}
+				if (err == 1)
+					err = 0;
+				else if (sUser[1].loc > 209)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else if (sUser[1].loc + 15 == sUser[0].loc)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else
+				{
+					for (int i = 0; i < 20; ++i)
+						if (sUser[1].loc + 15 == sChange[i].loc)
+						{
+							sUser[1].rgb[0] = sChange[i].rgb[0];
+							sUser[1].rgb[1] = sChange[i].rgb[1];
+							sUser[1].rgb[2] = sChange[i].rgb[2];
+						}
+					sUser[1].loc += 15;
+					sUser[1].rect = rect[sUser[1].loc / 15][sUser[1].loc % 15];
+					bTurn = 0;
+					InvalidateRect(hWnd, NULL, true);
+				}
+			}
+			else
+				DrawText(hDC, er1Text, _tcslen(er1Text), &rText,
+					DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+			break;
+		case 'j':
+		case 'J':
+			if (bTurn == 1)
+			{
+				for (int i = 0; i < 20; ++i)
+					if (sUser[1].loc - 1 == sBlock[i].loc)
+					{
+						DrawText(hDC, erText, _tcslen(erText), &rText,
+							DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+						++err;
+						break;
+					}
+				if (err == 1)
+					err = 0;
+				else if (sUser[1].loc % 15 == 0)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else if (sUser[1].loc - 1 == sUser[0].loc)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else
+				{
+					for (int i = 0; i < 20; ++i)
+						if (sUser[1].loc - 1 == sChange[i].loc)
+						{
+							sUser[1].rgb[0] = sChange[i].rgb[0];
+							sUser[1].rgb[1] = sChange[i].rgb[1];
+							sUser[1].rgb[2] = sChange[i].rgb[2];
+						}
+					--sUser[1].loc;
+					sUser[1].rect = rect[sUser[1].loc / 15][sUser[1].loc % 15];
+					bTurn = 0;
+					InvalidateRect(hWnd, NULL, true);
+				}
+			}
+			else
+				DrawText(hDC, er1Text, _tcslen(er1Text), &rText,
+					DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+			break;
+		case 'l':
+		case 'L':
+			if (bTurn == 1)
+			{
+				for (int i = 0; i < 20; ++i)
+					if (sUser[1].loc + 1 == sBlock[i].loc)
+					{
+						DrawText(hDC, erText, _tcslen(erText), &rText,
+							DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+						++err;
+						break;
+					}
+				if (err == 1)
+					err = 0;
+				else if (sUser[1].loc % 15 == 14)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else if (sUser[1].loc + 1 == sUser[0].loc)
+					DrawText(hDC, erText, _tcslen(erText), &rText,
+						DT_LEFT | DT_VCENTER | DT_SINGLELINE);
+				else
+				{
+					for (int i = 0; i < 20; ++i)
+						if (sUser[1].loc + 1 == sChange[i].loc)
+						{
+							sUser[1].rgb[0] = sChange[i].rgb[0];
+							sUser[1].rgb[1] = sChange[i].rgb[1];
+							sUser[1].rgb[2] = sChange[i].rgb[2];
+						}
+					++sUser[1].loc;
+					sUser[1].rect = rect[sUser[1].loc / 15][sUser[1].loc % 15];
+					bTurn = 0;
+					InvalidateRect(hWnd, NULL, true);
+				}
+			}
+			else
+				DrawText(hDC, er1Text, _tcslen(er1Text), &rText,
+					DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 			break;
 		}
 
 		ReleaseDC(hWnd, hDC);
-		break;
-	case WM_KEYUP:
-		switch (wParam)
-		{
-		case 'r':
-		case 'R':
-			InvalidateRect(hWnd, &rRec, true);
-			break;
-		case 't':
-		case 'T':
-			InvalidateRect(hWnd, &rTri, true);
-			break;
-		case 's':
-		case 'S':
-			InvalidateRect(hWnd, &rHrg, true);
-			break;
-		case 'p':
-		case 'P':
-			InvalidateRect(hWnd, &rPen, true);
-			break;
-		case 'e':
-		case 'E':
-			InvalidateRect(hWnd, &rPie, true);
-			break;
-		}
-		break;
-	case WM_CHAR:
-		if (wParam == 'C')
-		{
-			temp = rTri;
-			rTri = rPen;
-			rPen = rHrg;
-			rHrg = rPie;
-			rPie = temp;
-			rgbTri[0] = rand() % 10 + rand() % 247;
-			rgbTri[1] = rand() % 20 + rand() % 237;
-			rgbTri[2] = rand() % 30 + rand() % 227;
-			rgbHrg[0] = rand() % 40 + rand() % 217;
-			rgbHrg[1] = rand() % 50 + rand() % 207;
-			rgbHrg[2] = rand() % 60 + rand() % 197;
-			rgbPen[0] = rand() % 70 + rand() % 187;
-			rgbPen[1] = rand() % 80 + rand() % 177;
-			rgbPen[2] = rand() % 90 + rand() % 167;
-			rgbPie[0] = rand() % 100 + rand() % 157;
-			rgbPie[1] = rand() % 110 + rand() % 147;
-			rgbPie[2] = rand() % 120 + rand() % 137;
-			InvalidateRect(hWnd, NULL, true);
-		}
-		else if (wParam == 'c')
-		{
-			temp = rTri;
-			rTri = rPie;
-			rPie = rHrg;
-			rHrg = rPen;
-			rPen = temp;
-			rgbTri[0] = rand() % 10 + rand() % 247;
-			rgbTri[1] = rand() % 20 + rand() % 237;
-			rgbTri[2] = rand() % 30 + rand() % 227;
-			rgbHrg[0] = rand() % 40 + rand() % 217;
-			rgbHrg[1] = rand() % 50 + rand() % 207;
-			rgbHrg[2] = rand() % 60 + rand() % 197;
-			rgbPen[0] = rand() % 70 + rand() % 187;
-			rgbPen[1] = rand() % 80 + rand() % 177;
-			rgbPen[2] = rand() % 90 + rand() % 167;
-			rgbPie[0] = rand() % 100 + rand() % 157;
-			rgbPie[1] = rand() % 110 + rand() % 147;
-			rgbPie[2] = rand() % 120 + rand() % 137;
-			InvalidateRect(hWnd, NULL, true);
-		}
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
