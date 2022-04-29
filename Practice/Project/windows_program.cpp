@@ -4,7 +4,7 @@
 
 HINSTANCE g_hInst;
 LPCTSTR lpszClass = L"Window Class Name";
-LPCTSTR lpszWindowName = L"Windows program 3_1";
+LPCTSTR lpszWindowName = L"Windows program 3_2";
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
@@ -49,28 +49,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 
-struct Circle
+struct Block
 {
 	RECT rect;
-	int tail;
-	int main;
-	int sub;
-	int loc;
-	int sp;
+	int stat;
 };
 
-float LengthPts(int x1, int y1, int x2, int y2)
+BOOL InBar(int x, int y, RECT rect)
 {
-	return (sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)));
-}
-
-BOOL InCircle(int x, int y, RECT rect)
-{
-	if (LengthPts(x, y, (rect.left / 2) + (rect.right / 2),
-		(rect.top / 2) + (rect.bottom / 2)) < ((rect.right - rect.left) / 2))
+	if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom)
 		return true;
-	else
-		return false;
+	else false;
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -80,14 +69,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	HBRUSH hBrush, oldBrush;
 
 	static RECT rClient{};
-	static RECT rBoard[40][40]{};
-	static Circle cMain{};
-	static Circle cTail[20]{};
-	static int iSc{};
-	static int iSpeed;
-	static bool bStart = false;
-
-	bool bTI = true;
+	static RECT rBar{};
+	static RECT rBall{};
+	static Block bBlock[30]{};
+	static int iSpeed{};
+	static int xSpeed{};
+	static int ySpeed{};
+	static bool Selection{};
+	static bool Line[3]{};
+	static bool Move{};
 
 	// 메시지 처리하기
 	switch (uMsg)
@@ -95,50 +85,133 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:							// 메시지에 따라 처리
 		GetClientRect(hwnd, &rClient);
 
-		srand((unsigned int)time(0));
+		for (int i = 0; i < 10; ++i)
+		{
+			bBlock[i].rect.left = rClient.right * (i + 1) / 12;
+			bBlock[i].rect.right = rClient.right * (i + 2) / 12;
+			bBlock[i].rect.top = rClient.top;
+			bBlock[i].rect.bottom = rClient.top + 50;
+			bBlock[i + 10].rect.left = rClient.right * (i + 1) / 12;
+			bBlock[i + 10].rect.right = rClient.right * (i + 2) / 12;
+			bBlock[i + 10].rect.top = rClient.top + 50;
+			bBlock[i + 10].rect.bottom = rClient.top + 100;
+			bBlock[i + 20].rect.left = rClient.right * (i + 1) / 12;
+			bBlock[i + 20].rect.right = rClient.right * (i + 2) / 12;
+			bBlock[i + 20].rect.top = rClient.top + 100;
+			bBlock[i + 20].rect.bottom = rClient.top + 150;
+			bBlock[i].stat = 0;
+			bBlock[i + 10].stat = 0;
+			bBlock[i + 20].stat = 0;
+		}
 
-		SetTimer(hwnd, 1, 5000, NULL);
+		Line[0] = false;
+		Line[1] = false;
+		Line[2] = false;
+		Move = false;
+		iSpeed = 30;
 
-		for (int i = 0; i < 40; ++i)
-			for (int j = 0; j < 40; ++j)
-				rBoard[i][j] = {
-					{rClient.right * j / 40},
-					{rClient.bottom * i / 40},
-					{rClient.right * (j + 1) / 40},
-					{rClient.bottom * (i + 1) / 40}
-			};
+		rBar = {
+			{rClient.left + 300},
+			{rClient.bottom - 75},
+			{rClient.left + 500},
+			{rClient.bottom - 25}
+		};
 
-		cMain.rect = rBoard[0][0];
-		cMain.main = 1;
-		cMain.sub = 3;
-		cMain.tail = 0;
-		cMain.loc = 0;
-		cMain.sp = 100;
+		rBall = {
+			{rClient.left + 385},
+			{rClient.bottom - 106},
+			{rClient.left + 415},
+			{rClient.bottom - 75}
+		};
 
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hwnd, &ps);
 
-		for (int i = 0; i < 40; ++i)
-			for (int j = 0; j < 40; ++j)
-				Rectangle(hdc, rBoard[i][j].left, rBoard[i][j].top,
-					rBoard[i][j].right, rBoard[i][j].bottom);
+		if (Line[0] == false)
+		{
+			hBrush = CreateSolidBrush(RGB(255, 255, 0));
+			oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+			for (int i = 0; i < 10; ++i)
+			{
+				Rectangle(hdc, bBlock[i].rect.left, bBlock[i].rect.top,
+					bBlock[i].rect.right, bBlock[i].rect.bottom);
+			}
+			SelectObject(hdc, oldBrush);
+			DeleteObject(hBrush);
+		}
+		else
+		{
+			hBrush = CreateSolidBrush(RGB(0, 0, 255));
+			oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+			for (int i = 0; i < 10; ++i)
+			{
+				Rectangle(hdc, bBlock[i].rect.left, bBlock[i].rect.top,
+					bBlock[i].rect.right, bBlock[i].rect.bottom);
+			}
+			SelectObject(hdc, oldBrush);
+			DeleteObject(hBrush);
+		}
+
+		if (Line[1] == false)
+		{
+			hBrush = CreateSolidBrush(RGB(255, 255, 0));
+			oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+			for (int i = 0; i < 10; ++i)
+			{
+				Rectangle(hdc, bBlock[i + 10].rect.left, bBlock[i + 10].rect.top,
+					bBlock[i + 10].rect.right, bBlock[i + 10].rect.bottom);
+			}
+			SelectObject(hdc, oldBrush);
+			DeleteObject(hBrush);
+		}
+		else
+		{
+			hBrush = CreateSolidBrush(RGB(0, 255, 0));
+			oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+			for (int i = 0; i < 10; ++i)
+			{
+				Rectangle(hdc, bBlock[i + 10].rect.left, bBlock[i + 10].rect.top,
+					bBlock[i + 10].rect.right, bBlock[i + 10].rect.bottom);
+			}
+			SelectObject(hdc, oldBrush);
+			DeleteObject(hBrush);
+		}
+
+		if (Line[2] == false)
+		{
+			hBrush = CreateSolidBrush(RGB(255, 255, 0));
+			oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+			for (int i = 0; i < 10; ++i)
+			{
+				Rectangle(hdc, bBlock[i + 20].rect.left, bBlock[i + 20].rect.top,
+					bBlock[i + 20].rect.right, bBlock[i + 20].rect.bottom);
+			}
+			SelectObject(hdc, oldBrush);
+			DeleteObject(hBrush);
+		}
+		else
+		{
+			hBrush = CreateSolidBrush(RGB(0, 0, 255));
+			oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+			for (int i = 0; i < 10; ++i)
+			{
+				Rectangle(hdc, bBlock[i + 20].rect.left, bBlock[i + 20].rect.top,
+					bBlock[i + 20].rect.right, bBlock[i + 20].rect.bottom);
+			}
+			SelectObject(hdc, oldBrush);
+			DeleteObject(hBrush);
+		}
 
 		hBrush = CreateSolidBrush(RGB(255, 255, 0));
 		oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-		Ellipse(hdc, cMain.rect.left, cMain.rect.top,
-			cMain.rect.right, cMain.rect.bottom);
+		Rectangle(hdc, rBar.left, rBar.top, rBar.right, rBar.bottom);
 		SelectObject(hdc, oldBrush);
 		DeleteObject(hBrush);
 
-
 		hBrush = CreateSolidBrush(RGB(255, 0, 0));
 		oldBrush = (HBRUSH)SelectObject(hdc, hBrush);
-		for (int i = 0; i <= iSc; ++i)
-		{
-			Ellipse(hdc, cTail[i].rect.left, cTail[i].rect.top,
-				cTail[i].rect.right, cTail[i].rect.bottom);
-		}
+		Ellipse(hdc, rBall.left, rBall.top, rBall.right, rBall.bottom);
 		SelectObject(hdc, oldBrush);
 		DeleteObject(hBrush);
 
@@ -148,291 +221,280 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		switch (wParam)
 		{
 		case 1:
-			for (int i = 0; i < iSc; ++i)
-				if (cTail[i].rect.left == rBoard[20][20].left)
-					bTI = false;
-			if (cMain.rect.left == rBoard[20][20].left)
-				bTI = false;
-			if (iSc < 20 && bTI == true)
+			if (Move)
 			{
-				cTail[iSc].rect = rBoard[20][20];
-				cTail[iSc].main = rand() % 4;
-				cTail[iSc].tail = -1;
-				cTail[iSc].loc = 420;
-				iSc++;
+				rBall.left += xSpeed;
+				rBall.right += xSpeed;
+				rBall.top += ySpeed;
+				rBall.bottom += ySpeed;
+				InvalidateRect(hwnd, &rClient, true);
 			}
-			break;
-		case 2:
-			if (iSpeed == 0)
+			if (rBall.bottom >= rBar.top && !(rBall.top > rBar.top)
+				&& ((rBall.left + rBall.right) / 2))
 			{
-				cMain.sp += 10;
-				SetTimer(hwnd, 2, cMain.sp, NULL);
-			}
-			for (int i = 0; i < iSc; ++i)
-			{
-				if (cTail[i].tail == -1)
+				if (xSpeed < 0)
 				{
-					switch (cTail[i].main)
-					{
-					case 0:
-						cTail[i].loc--;
-						cTail[i].rect = rBoard[cTail[i].loc / 40][cTail[i].loc % 40];
-						if (cTail[i].loc % 40 == 0)
-							while (cTail[i].main == 0)
-								cTail[i].main = rand() % 4;
-						break;
-					case 1:
-						cTail[i].loc++;
-						cTail[i].rect = rBoard[cTail[i].loc / 40][cTail[i].loc % 40];
-						if (cTail[i].loc % 40 == 39)
-							while (cTail[i].main == 1)
-								cTail[i].main = rand() % 4;
-						break;
-					case 2:
-						cTail[i].loc -= 40;
-						cTail[i].rect = rBoard[cTail[i].loc / 40][cTail[i].loc % 40];
-						if (cTail[i].loc / 40 == 0)
-							while (cTail[i].main == 2)
-								cTail[i].main = rand() % 4;
-						break;
-					case 3:
-						cTail[i].loc += 40;
-						cTail[i].rect = rBoard[cTail[i].loc / 40][cTail[i].loc % 40];
-						if (cTail[i].loc / 40 == 39)
-							while (cTail[i].main == 3)
-								cTail[i].main = rand() % 4;
-						break;
-					}
-					if (cTail[i].loc - 1 == cMain.loc
-						|| cTail[i].loc + 1 == cMain.loc
-						|| cTail[i].loc - 40 == cMain.loc
-						|| cTail[i].loc + 40 == cMain.loc)
-					{
-						cTail[i].tail = cMain.tail;
-						cMain.tail++;
-					}
+					xSpeed = -iSpeed / 2;
+					ySpeed = -iSpeed / 2;
 				}
-				else if (cTail[i].tail == 0)
-					cTail[i].rect = cMain.rect;
 				else
-					for (int j = 0; j < iSc; ++j)
-						if (cTail[i].tail - 1 == cTail[j].tail)
-							cTail[i].rect = cTail[j].rect;
-				if (cTail[i].loc < 0 || cTail[i].loc > 1599)
-					cTail[i].main = 5;
+				{
+					xSpeed = iSpeed / 2;
+					ySpeed = -iSpeed / 2;
+				}
 			}
-			switch (cMain.main)
+			if (rBall.right >= rClient.right || rBall.left <= rClient.left)
+				xSpeed = -xSpeed;
+			if (rBall.top <= rClient.top)
+				ySpeed = -ySpeed;
+			if (rBall.top >= rClient.bottom)
 			{
-			case 0:		// 좌로 이동
-				if (cMain.loc == 0)
-				{
-					cMain.main = 1;
-					cMain.sub = 3;
-					cMain.loc++;
-					cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					break;
-				}
-				else if (cMain.loc % 40 == 0)
-				{
-					if (cMain.sub == 2)
-					{
-						cMain.loc -= 40;
-						cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					}
-					else if (cMain.sub == 3)
-					{
-						cMain.loc += 40;
-						cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					}
-					cMain.main = 1;
-					break;
-				}
-				cMain.loc--;
-				cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-				break;
-			case 1:		// 우로 이동
-				if (cMain.loc == 1599)
-				{
-					cMain.main = 0;
-					cMain.sub = 2;
-					cMain.loc--;
-					cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					break;
-				}
-				else if (cMain.loc % 40 == 39)
-				{
-					if (cMain.sub == 2)
-					{
-						cMain.loc -= 40;
-						cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					}
-					else if (cMain.sub == 3)
-					{
-						cMain.loc += 40;
-						cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					}
-					cMain.main = 0;
-					break;
-				}
-				cMain.loc++;
-				cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-				break;
-			case 2:		// 상으로 이동
-				if (cMain.loc == 0)
-				{
-					cMain.main = 3;
-					cMain.sub = 1;
-					cMain.loc += 40;
-					cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					break;
-				}
-				else if (cMain.loc / 40 == 0)
-				{
-					if (cMain.sub == 0)
-					{
-						cMain.loc--;
-						cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					}
-					else if (cMain.sub == 1)
-					{
-						cMain.loc++;
-						cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					}
-					cMain.main = 3;
-					break;
-				}
-				cMain.loc -= 40;
-				cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-				break;
-			case 3:		// 하로 이동
-				if (cMain.loc == 1599)
-				{
-					cMain.main = 2;
-					cMain.sub = 0;
-					cMain.loc -= 40;
-					cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					break;
-				}
-				if (cMain.loc / 40 == 39)
-				{
-					if (cMain.sub == 0)
-					{
-						cMain.loc--;
-						cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					}
-					else if (cMain.sub == 1)
-					{
-						cMain.loc++;
-						cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-					}
-					cMain.main = 2;
-					break;
-				}
-				cMain.loc += 40;
-				cMain.rect = rBoard[cMain.loc / 40][cMain.loc % 40];
-				break;
+				Move = false;
+				rBall = {
+					{LOWORD(lParam) - 15},
+					{rClient.bottom - 106},
+					{LOWORD(lParam) + 15},
+					{rClient.bottom - 75}
+				};
 			}
-			if (iSpeed >= 0)
-				iSpeed--;
+			for (int i = 0; i < 10; ++i)
+			{
+				if (rBall.top < bBlock[i].rect.bottom
+					&& ((rBall.left + rBall.right) / 2 >= bBlock[i].rect.left)
+					&& ((rBall.left + rBall.right) / 2 <= bBlock[i].rect.right))
+				{
+					Line[0] = true;
+					if (bBlock[i].stat == 1)
+					{
+						bBlock[i].rect.left = 0;
+						bBlock[i].rect.top = 0;
+						bBlock[i].rect.right = 0;
+						bBlock[i].rect.bottom = 0;
+						bBlock[i].stat++;
+					}
+
+					if ((rBall.left + rBall.right) / 2
+						== (bBlock[i].rect.left + bBlock[i].rect.right) / 2)
+					{
+						xSpeed = 0;
+						ySpeed = iSpeed;
+						bBlock[i].stat++;
+						bBlock[i].rect.top += 50;
+						bBlock[i].rect.bottom += 50;
+					}
+					else if ((rBall.left + rBall.right) / 2
+						< (bBlock[i].rect.left + bBlock[i].rect.right) / 2)
+					{
+						xSpeed = -iSpeed / 2;
+						ySpeed = iSpeed / 2;
+						bBlock[i].stat++;
+						bBlock[i].rect.top += 50;
+						bBlock[i].rect.bottom += 50;
+					}
+					else
+					{
+						xSpeed = iSpeed / 2;
+						ySpeed = iSpeed / 2;
+						bBlock[i].stat++;
+						bBlock[i].rect.top += 50;
+						bBlock[i].rect.bottom += 50;
+					}
+					break;
+				}
+				if (rBall.top < bBlock[i + 10].rect.bottom
+					&& ((rBall.left + rBall.right) / 2
+						>= bBlock[i + 10].rect.left)
+					&& ((rBall.left + rBall.right) / 2
+						<= bBlock[i + 10].rect.right)
+					&& ((rBall.top + rBall.bottom) / 2 > bBlock[i].rect.bottom))
+				{
+					Line[1] = true;
+
+					if (bBlock[i + 10].stat == 1)
+					{
+						bBlock[i + 10].rect.left = 0;
+						bBlock[i + 10].rect.top = 0;
+						bBlock[i + 10].rect.right = 0;
+						bBlock[i + 10].rect.bottom = 0;
+						bBlock[i + 10].stat++;
+					}
+
+					if ((rBall.left + rBall.right) / 2
+						== (bBlock[i + 10].rect.left
+							+ bBlock[i + 10].rect.right) / 2)
+					{
+						xSpeed = 0;
+						ySpeed = iSpeed;
+						bBlock[i + 10].stat++;
+						bBlock[i + 10].rect.top += 50;
+						bBlock[i + 10].rect.bottom += 50;
+					}
+					else if ((rBall.left + rBall.right) / 2
+						< (bBlock[i + 10].rect.left
+							+ bBlock[i + 10].rect.right) / 2)
+					{
+						xSpeed = -iSpeed / 2;
+						ySpeed = iSpeed / 2;
+						bBlock[i + 10].stat++;
+						bBlock[i + 10].rect.top += 50;
+						bBlock[i + 10].rect.bottom += 50;
+					}
+					else
+					{
+						xSpeed = iSpeed / 2;
+						ySpeed = iSpeed / 2;
+						bBlock[i + 10].stat++;
+						bBlock[i + 10].rect.top += 50;
+						bBlock[i + 10].rect.bottom += 50;
+					}
+					break;
+				}
+				if (rBall.top < bBlock[i + 20].rect.bottom
+					&& ((rBall.left + rBall.right) / 2
+						>= bBlock[i + 20].rect.left)
+					&& ((rBall.left + rBall.right) / 2
+						<= bBlock[i + 20].rect.right)
+					&& ((rBall.top + rBall.bottom) / 2 > bBlock[i].rect.bottom))
+				{
+					Line[1] = true;
+
+					if (bBlock[i + 20].stat == 1)
+					{
+						bBlock[i + 20].rect.left = 0;
+						bBlock[i + 20].rect.top = 0;
+						bBlock[i + 20].rect.right = 0;
+						bBlock[i + 20].rect.bottom = 0;
+						bBlock[i + 20].stat++;
+					}
+
+					if ((rBall.left + rBall.right) / 2
+						== (bBlock[i + 20].rect.left
+							+ bBlock[i + 20].rect.right) / 2)
+					{
+						xSpeed = 0;
+						ySpeed = iSpeed;
+						bBlock[i + 20].stat++;
+						bBlock[i + 20].rect.top += 50;
+						bBlock[i + 20].rect.bottom += 50;
+					}
+					else if ((rBall.left + rBall.right) / 2
+						< (bBlock[i + 20].rect.left
+							+ bBlock[i + 20].rect.right) / 2)
+					{
+						xSpeed = -iSpeed / 2;
+						ySpeed = iSpeed / 2;
+						bBlock[i + 20].stat++;
+						bBlock[i + 20].rect.top += 50;
+						bBlock[i + 20].rect.bottom += 50;
+					}
+					else
+					{
+						xSpeed = iSpeed / 2;
+						ySpeed = iSpeed / 2;
+						bBlock[i + 20].stat++;
+						bBlock[i + 20].rect.top += 50;
+						bBlock[i + 20].rect.bottom += 50;
+					}
+					break;
+				}
+			}
 			break;
 		}
-		InvalidateRect(hwnd, &rClient, true);
 		break;
 	case WM_LBUTTONDOWN:
-		if (InCircle(LOWORD(lParam), HIWORD(lParam), cMain.rect))
+		if (InBar(LOWORD(lParam), HIWORD(lParam), rBar) && Move)
 		{
-			if (iSpeed < 0 && cMain.sp != 10)
-			{
-				iSpeed = 10;
-				cMain.sp -= 10;
-				SetTimer(hwnd, 2, cMain.sp, NULL);
-			}
-			break;
+			Selection = true;
+			rBar = {
+			{LOWORD(lParam) - 100},
+			{rClient.bottom - 75},
+			{LOWORD(lParam) + 100},
+			{rClient.bottom - 25}
+			};
 		}
-		for (int i = 0; i < iSc; ++i)
-			if (InCircle(LOWORD(lParam), HIWORD(lParam), cTail[i].rect))
-			{
-				cTail[i].tail = -1;
-				cTail[i].main = rand() % 4;
-				break;
-			}
-		if (LOWORD(lParam) < cMain.rect.left)
-		{
-			cMain.main = 0;
-			if (HIWORD(lParam) < cMain.rect.top)
-				cMain.sub = 2;
-			else
-				cMain.sub = 3;
-		}
-		else if (LOWORD(lParam) > cMain.rect.right)
-		{
-			cMain.main = 1;
-			if (HIWORD(lParam) < cMain.rect.top)
-				cMain.sub = 2;
-			else
-				cMain.sub = 3;
-		}
-		else if (HIWORD(lParam) < cMain.rect.top)
-			cMain.main = 2;
-		else if (HIWORD(lParam) > cMain.rect.bottom)
-			cMain.main = 3;
-
 		break;
-	case WM_KEYDOWN:
+	case WM_LBUTTONUP:
+		Selection = false;
+		break;
+	case WM_MOUSEMOVE:
+		if (Selection && Move)
+		{
+			rBar = {
+				{LOWORD(lParam) - 100},
+				{rClient.bottom - 75},
+				{LOWORD(lParam) + 100},
+				{rClient.bottom - 25}
+			};
+		}
+		break;
+	case WM_CHAR:
 		switch (wParam)
 		{
-		case 'Q':
 		case 'q':
+		case 'Q':
 			PostQuitMessage(0);
 			break;
-		case 'S':
 		case 's':
-			if (bStart == false)
-				SetTimer(hwnd, 2, cMain.sp, NULL);
-			bStart = true;
+		case 'S':
+			Move = true;
+			xSpeed = 0;
+			ySpeed = -iSpeed;
+			InvalidateRect(hwnd, &rClient, true);
+			SetTimer(hwnd, 1, 100, NULL);
 			break;
-		case VK_LEFT:
-			cMain.main = 0;
-			if (cMain.sub == 0 || cMain.sub == 1)
-				2;
-			break;
-		case VK_RIGHT:
-			cMain.main = 1;
-			if (cMain.sub == 0 || cMain.sub == 1)
-				3;
-			break;
-		case VK_UP:
-			cMain.main = 2;
-			if (cMain.sub == 2 || cMain.sub == 3)
-				0;
-			break;
-		case VK_DOWN:
-			cMain.main = 3;
-			if (cMain.sub == 2 || cMain.sub == 3)
-				1;
+		case 'p':
+		case 'P':
+			Move = false;
+			InvalidateRect(hwnd, &rClient, true);
 			break;
 		case '+':
-			if (cMain.sp > 10)
-				cMain.sp -= 10;
-			SetTimer(hwnd, 2, cMain.sp, NULL);
+			if (iSpeed < 50)
+				iSpeed += 10;
 			break;
 		case '-':
-			if (cMain.sp < 200)
-				cMain.sp += 10;
-			SetTimer(hwnd, 2, cMain.sp, NULL);
+			if (iSpeed > 10)
+				iSpeed -= 10;
 			break;
-		case 'J':
-		case 'j':
-			if (cMain.loc / 40 > 0)
+		case 'n':
+		case 'N':
+			for (int i = 0; i < 10; ++i)
 			{
-				cMain.loc -= 40;
-				for (int i = 0; i < iSc; ++i)
-					cTail[i].loc -= 40;
-				InvalidateRect(hwnd, &rClient, true);
-				cMain.loc += 40;
-				for (int i = 0; i < iSc; ++i)
-					cTail[i].loc += 40;
+				bBlock[i].rect.left = rClient.right * (i + 1) / 12;
+				bBlock[i].rect.right = rClient.right * (i + 2) / 12;
+				bBlock[i].rect.top = rClient.top;
+				bBlock[i].rect.bottom = rClient.top + 50;
+				bBlock[i + 10].rect.left = rClient.right * (i + 1) / 12;
+				bBlock[i + 10].rect.right = rClient.right * (i + 2) / 12;
+				bBlock[i + 10].rect.top = rClient.top + 50;
+				bBlock[i + 10].rect.bottom = rClient.top + 100;
+				bBlock[i + 20].rect.left = rClient.right * (i + 1) / 12;
+				bBlock[i + 20].rect.right = rClient.right * (i + 2) / 12;
+				bBlock[i + 20].rect.top = rClient.top + 100;
+				bBlock[i + 20].rect.bottom = rClient.top + 150;
+				bBlock[i].stat = 0;
+				bBlock[i + 10].stat = 0;
+				bBlock[i + 20].stat = 0;
 			}
+
+			Line[0] = false;
+			Line[1] = false;
+			Move = false;
+			iSpeed = 30;
+
+			rBar = {
+				{rClient.left + 300},
+				{rClient.bottom - 75},
+				{rClient.left + 500},
+				{rClient.bottom - 25}
+			};
+
+			rBall = {
+				{rClient.left + 385},
+				{rClient.bottom - 106},
+				{rClient.left + 415},
+				{rClient.bottom - 75}
+			};
+			InvalidateRect(hwnd, &rClient, true);
 			break;
 		}
 		break;
