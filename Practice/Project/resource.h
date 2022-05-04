@@ -19,23 +19,23 @@
 #define ID_40014                        40014
 #define ID_40015                        40015
 #define ID_40016                        40016
-#define ID_GM_ST                        40017
-#define ID_GM_RS                        40018
-#define ID_GM_ED                        40019
-#define ID_SP_FA                        40020
-#define ID_SP_ME                        40021
-#define ID_SP_SL                        40022
-#define ID_CO_CY                        40023
-#define ID_CO_MA                        40024
-#define ID_CO_YE                        40025
-#define ID_SH_CI                        40026
-#define ID_SH_RE                        40027
+#define ID_GAME_START                        40017
+#define ID_GAME_RESET                        40018
+#define ID_GAME_END                        40019
+#define ID_SPEED_FAST                        40020
+#define ID_SPEED_MEDIUM                        40021
+#define ID_SPEED_SLOW                        40022
+#define ID_COLOR_CYAN                        40023
+#define ID_COLOR_MAGENTA                        40024
+#define ID_COLOR_YELLOW                        40025
+#define ID_SHAPE_CIRCLE                        40026
+#define ID_SHAPE_RECTANGLE                        40027
 #define ID_                             40028
-#define ID_ST_2                         40029
-#define ID_ST_3                         40030
-#define ID_ST_4                         40031
-#define ID_MV_ON                        40032
-#define ID_MV_OF                        40033
+#define ID_STEP_2                         40029
+#define ID_STEP_3                         40030
+#define ID_STEP_4                         40031
+#define ID_MOVE_ON                        40032
+#define ID_MOVE_OFF                        40033
 
 // Next default values for new objects
 // 

@@ -548,12 +548,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_COMMAND:
 		switch (LOWORD(wParam))
 		{
-		case ID_GM_ST:
+		case ID_GAME_START:
 			Move = true;
 			InvalidateRect(hwnd, &rClient, true);
 			SetTimer(hwnd, 1, 100, NULL);
 			break;
-		case ID_GM_RS:
+		case ID_GAME_RESET:
 			Line[0] = false;
 			Line[1] = false;
 			Move = false;
@@ -591,10 +591,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			};
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_GM_ED:
+		case ID_GAME_END:
 			PostQuitMessage(0);
 			break;
-		case ID_SP_FA:
+		case ID_SPEED_FAST:
 			iSpeed = 50;
 			if (xSpeed == 0)
 			{
@@ -615,7 +615,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					ySpeed = -iSpeed / 2;
 			}
 			break;
-		case ID_SP_ME:
+		case ID_SPEED_MEDIUM:
 			iSpeed = 30;
 			if (xSpeed == 0)
 			{
@@ -636,7 +636,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					ySpeed = -iSpeed / 2;
 			}
 			break;
-		case ID_SP_SL:
+		case ID_SPEED_SLOW:
 			iSpeed = 10;
 			if (xSpeed == 0)
 			{
@@ -657,31 +657,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					ySpeed = -iSpeed / 2;
 			}
 			break;
-		case ID_CO_CY:
+		case ID_COLOR_CYAN:
 			cColor = 'c';
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_CO_MA:
+		case ID_COLOR_MAGENTA:
 			cColor = 'm';
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_CO_YE:
+		case ID_COLOR_YELLOW:
 			cColor = 'y';
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_SH_CI:
+		case ID_SHAPE_CIRCLE:
 			bShape = false;
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_SH_RE:
+		case ID_SHAPE_RECTANGLE:
 			bShape = true;
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_ST_2:
+		case ID_STEP_2:
 			iStep = 2;
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_ST_3:
+		case ID_STEP_3:
 			iStep = 3;
 			for (int i = 0; i < iStep; ++i)
 				for (int j = 0; j < 10; ++j)
@@ -694,7 +694,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_ST_4:
+		case ID_STEP_4:
 			iStep = 4;
 			for (int i = 0; i < iStep; ++i)
 				for (int j = 0; j < 10; ++j)
@@ -707,7 +707,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_MV_ON:
+		case ID_MOVE_ON:
 			bBmove = true;
 			for (int i = 0; i < iStep; ++i)
 				for (int j = 0; j < 10; ++j)
@@ -730,7 +730,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			SetTimer(hwnd, 2, 1000, NULL);
 			InvalidateRect(hwnd, &rClient, true);
 			break;
-		case ID_MV_OF:
+		case ID_MOVE_OFF:
 			bBmove = false;
 			break;
 		}

@@ -54,37 +54,37 @@ IDR_MENU1 MENU
 BEGIN
     POPUP "게임"
     BEGIN
-        MENUITEM "Start",                       ID_GM_ST
-        MENUITEM "Reset",                       ID_GM_RS
-        MENUITEM "End",                         ID_GM_ED
+        MENUITEM "Start", ID_GAME_START
+        MENUITEM "Reset", ID_GAME_RESET
+        MENUITEM "End", ID_GAME_END
     END
     POPUP "속도"
     BEGIN
-        MENUITEM "Fast",                        ID_SP_FA
-        MENUITEM "Medium",                      ID_SP_ME
-        MENUITEM "Slow",                        ID_SP_SL
+        MENUITEM "Fast", ID_SPEED_FAST
+        MENUITEM "Medium", ID_SPEED_MEDIUM
+        MENUITEM "Slow", ID_SPEED_SLOW
     END
     POPUP "보드 색상"
     BEGIN
-        MENUITEM "Cyan",                        ID_CO_CY
-        MENUITEM "Magenta",                     ID_CO_MA
-        MENUITEM "Yellow",                      ID_CO_YE
+        MENUITEM "Cyan", ID_COLOR_CYAN
+        MENUITEM "Magenta", ID_COLOR_MAGENTA
+        MENUITEM "Yellow", ID_COLOR_YELLOW
     END
     POPUP "공 모양"
     BEGIN
-        MENUITEM "원",                           ID_SH_CI
-        MENUITEM "네모",                          ID_SH_RE
+        MENUITEM "원", ID_SHAPE_CIRCLE
+        MENUITEM "네모", ID_SHAPE_RECTANGLE
     END
     POPUP "벽돌 단"
     BEGIN
-        MENUITEM "2",                           ID_ST_2
-        MENUITEM "3",                           ID_ST_3
-        MENUITEM "4",                           ID_ST_4
+        MENUITEM "2", ID_STEP_2
+        MENUITEM "3", ID_STEP_3
+        MENUITEM "4", ID_STEP_4
     END
     POPUP "벽돌 이동"
     BEGIN
-        MENUITEM "on",                          ID_MV_ON
-        MENUITEM "off",                         ID_MV_OF
+        MENUITEM "on", ID_MOVE_ON
+        MENUITEM "off", ID_MOVE_OFF
     END
 END
 
