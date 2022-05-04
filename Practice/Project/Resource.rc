@@ -1,0 +1,105 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 한국어(대한민국) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_KOR)
+LANGUAGE LANG_KOREAN, SUBLANG_DEFAULT
+#pragma code_page(949)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""winres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MENU1 MENU
+BEGIN
+    POPUP "게임"
+    BEGIN
+        MENUITEM "Start",                       ID_GM_ST
+        MENUITEM "Reset",                       ID_GM_RS
+        MENUITEM "End",                         ID_GM_ED
+    END
+    POPUP "속도"
+    BEGIN
+        MENUITEM "Fast",                        ID_SP_FA
+        MENUITEM "Medium",                      ID_SP_ME
+        MENUITEM "Slow",                        ID_SP_SL
+    END
+    POPUP "보드 색상"
+    BEGIN
+        MENUITEM "Cyan",                        ID_CO_CY
+        MENUITEM "Magenta",                     ID_CO_MA
+        MENUITEM "Yellow",                      ID_CO_YE
+    END
+    POPUP "공 모양"
+    BEGIN
+        MENUITEM "원",                           ID_SH_CI
+        MENUITEM "네모",                          ID_SH_RE
+    END
+    POPUP "벽돌 단"
+    BEGIN
+        MENUITEM "2",                           ID_ST_2
+        MENUITEM "3",                           ID_ST_3
+        MENUITEM "4",                           ID_ST_4
+    END
+    POPUP "벽돌 이동"
+    BEGIN
+        MENUITEM "on",                          ID_MV_ON
+        MENUITEM "off",                         ID_MV_OF
+    END
+END
+
+#endif    // 한국어(대한민국) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
