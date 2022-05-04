@@ -1,4 +1,4 @@
-#include <windows.h>
+#include <Windows.h>
 #include <tchar.h>
 #include <random>
 
@@ -49,14 +49,51 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpszCmdPa
 	return Message.wParam;
 }
 
-struct Circle
+class Circle
 {
-	RECT rect;
-	int tail;
-	int main;
-	int sub;
-	int loc;
-	int sp;
+public:
+	RECT rect{};
+	int tail{};
+	int main{};
+	int sub{};
+	int loc{};
+	int sp{};
+
+	void move(const RECT* board, int direction)
+	{
+		switch (direction)
+		{
+		case '0':
+			if (loc == 0)
+			{
+				main = 1;
+				sub = 3;
+				loc++;
+				rect = board[loc];
+				return;
+			}
+			else if (loc % 40 == 0)
+			{
+				if (sub == 2)
+				{
+					loc -= 40;
+					rect = board[loc];
+				}
+				else if (sub == 3)
+				{
+					loc += 40;
+					rect = board[loc];
+				}
+				main = 1;
+				return;
+			}
+			loc--;
+			rect = board[loc];
+			break;
+		default:
+			break;
+		}
+	}
 };
 
 float LengthPts(int x1, int y1, int x2, int y2)
@@ -378,6 +415,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			cMain.main = 3;
 
 		break;
+	case WM_RBUTTONDOWN:
+		break;
 	case WM_KEYDOWN:
 		switch (wParam)
 		{
@@ -394,22 +433,22 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		case VK_LEFT:
 			cMain.main = 0;
 			if (cMain.sub == 0 || cMain.sub == 1)
-				2;
+				cMain.sub = 2;
 			break;
 		case VK_RIGHT:
 			cMain.main = 1;
 			if (cMain.sub == 0 || cMain.sub == 1)
-				3;
+				cMain.sub = 3;
 			break;
 		case VK_UP:
 			cMain.main = 2;
 			if (cMain.sub == 2 || cMain.sub == 3)
-				0;
+				cMain.sub = 0;
 			break;
 		case VK_DOWN:
 			cMain.main = 3;
 			if (cMain.sub == 2 || cMain.sub == 3)
-				1;
+				cMain.sub = 1;
 			break;
 		case '+':
 			if (cMain.sp > 10)
@@ -433,6 +472,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				for (int i = 0; i < iSc; ++i)
 					cTail[i].loc += 40;
 			}
+			break;
+		case 'T':
+		case 't':
+
+			break;
+		default: 
 			break;
 		}
 		break;
