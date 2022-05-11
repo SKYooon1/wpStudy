@@ -27,9 +27,6 @@
     <ClInclude Include="WinMain.h" />
     <ClInclude Include="wndProc.h" />
   </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="Resource.rc" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>

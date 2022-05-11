@@ -2,6 +2,5 @@
 
 #include "wndProc.h"
 
-HINSTANCE globalHInstance;
-LPCTSTR lpszClass = L"Window Class Name";
-LPCTSTR lpszWindowName = L"Windows program 3_1";
+static LPCTSTR lpszClass = L"Window Class Name";
+static LPCTSTR lpszWindowName = L"Windows program 5_1";
