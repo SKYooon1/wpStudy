@@ -9,6 +9,8 @@ public:
 	int subRoute{};
 	int location{};
 	int speed{};
+	int rgb[3]{255, 255, 0};
+	bool shapeRect{};
 
 	void move(const RECT* board, const int direction)
 	{
@@ -70,7 +72,6 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int iSc{};
 	bool bTi = true;
 	static bool bStart = false;
-	static bool Move{};
 
 	// 메시지 처리하기
 	switch (iMessage)
@@ -107,9 +108,12 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			for (const RECT rect : rects)
 				Rectangle(hdc, rect.left, rect.top, rect.right, rect.bottom);
 
-		hBrush = CreateSolidBrush(RGB(255, 255, 0));
+		hBrush = CreateSolidBrush(RGB(cMain.rgb[0], cMain.rgb[1], cMain.rgb[2]));
 		oldBrush = static_cast<HBRUSH>(SelectObject(hdc, hBrush));
-		Ellipse(hdc, cMain.rect.left, cMain.rect.top, cMain.rect.right, cMain.rect.bottom);
+		if (!cMain.shapeRect)
+			Ellipse(hdc, cMain.rect.left, cMain.rect.top, cMain.rect.right, cMain.rect.bottom);
+		else
+			Rectangle(hdc, cMain.rect.left, cMain.rect.top, cMain.rect.right, cMain.rect.bottom);
 		SelectObject(hdc, oldBrush);
 		DeleteObject(hBrush);
 
@@ -425,191 +429,79 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 		case WM_COMMAND:
-			switch (LOWORD(wParam))
 			{
-			case ID_GAME_START:
-				Move = true;
-				InvalidateRect(hWnd, &rClient, true);
-				SetTimer(hWnd, 1, 100, NULL);
-				break;
-			case ID_GAME_RESET:
-				Move = false;
-				iSpeed = 30;
-				cColor = 'y';
-				bShape = false;
-				xMouse = rClient.left + 400;
-				iStep = 2;
-				bBmove = false;
-
-				for (int i = 0; i < iStep; ++i)
-					for (int j = 0; j < 10; ++j)
-					{
-						bBlock[(i * 10) + j].rect.left = rClient.right * (j + 1) / 12;
-						bBlock[(i * 10) + j].rect.right = rClient.right * (j + 2) / 12;
-						bBlock[(i * 10) + j].rect.top = rClient.top + (50 * i);
-						bBlock[(i * 10) + j].rect.bottom = rClient.top + (50 * (i + 1));
-						bBlock[(i * 10) + j].stat = 0;
-					}
-
-				rBar = {
-					{rClient.left + 300},
-					{rClient.bottom - 75},
-					{rClient.left + 500},
-					{rClient.bottom - 25}
-				};
-
-				rBall = {
-					{rClient.left + 385},
-					{rClient.bottom - 106},
-					{rClient.left + 415},
-					{rClient.bottom - 75}
-				};
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_GAME_END:
-				PostQuitMessage(0);
-				break;
-			case ID_SPEED_FAST:
-				iSpeed = 50;
-				if (xSpeed == 0)
+				switch (LOWORD(wParam))
 				{
-					if (ySpeed > 0)
-						ySpeed = iSpeed;
-					else
-						ySpeed = -iSpeed;
+				case ID_GAME_START:
+					if (bStart == false)
+						SetTimer(hWnd, 2, cMain.speed, nullptr);
+					bStart = true;
+					InvalidateRect(hWnd, &rClient, true);
+					SetTimer(hWnd, 1, cMain.speed, nullptr);
+					break;
+				case ID_GAME_RESET:
+					bStart = false;
+					iSpeed = 30;
+					cMain.rgb[0] = 255;
+					cMain.rgb[1] = 255;
+					cMain.rgb[2] = 0;
+					cMain.shapeRect = false;
+					bStart = false;
+					
+					InvalidateRect(hWnd, &rClient, true);
+					break;
+				case ID_GAME_END:
+					PostQuitMessage(0);
+					break;
+				case ID_SPEED_FAST:
+					iSpeed = 50;
+					SetTimer(hWnd, 2, cMain.speed, nullptr);
+					break;
+				case ID_SPEED_MEDIUM:
+					iSpeed = 30;
+					SetTimer(hWnd, 2, cMain.speed, nullptr);
+					break;
+				case ID_SPEED_SLOW:
+					iSpeed = 10;
+					SetTimer(hWnd, 2, cMain.speed, nullptr);
+					break;
+				case ID_COLOR_CYAN:
+					cMain.rgb[0] = 0;
+					cMain.rgb[1] = 255;
+					cMain.rgb[2] = 255;
+					InvalidateRect(hWnd, &rClient, true);
+					break;
+				case ID_COLOR_MAGENTA:
+					cMain.rgb[0] = 255;
+					cMain.rgb[1] = 0;
+					cMain.rgb[2] = 255;
+					InvalidateRect(hWnd, &rClient, true);
+					break;
+				case ID_COLOR_YELLOW:
+					cMain.rgb[0] = 255;
+					cMain.rgb[1] = 255;
+					cMain.rgb[2] = 0;
+					InvalidateRect(hWnd, &rClient, true);
+					break;
+				case ID_SHAPE_CIRCLE:
+					cMain.shapeRect = false;
+					InvalidateRect(hWnd, &rClient, true);
+					break;
+				case ID_SHAPE_RECTANGLE:
+					cMain.shapeRect = true;
+					InvalidateRect(hWnd, &rClient, true);
+					break;
+				case ID_MOVE_ON:
+					bStart = true;
+					SetTimer(hWnd, 2, 1000, nullptr);
+					InvalidateRect(hWnd, &rClient, true);
+					break;
+				case ID_MOVE_OFF:
+					bStart = false;
+					break;
 				}
-				else
-				{
-					if (xSpeed > 0)
-						xSpeed = iSpeed / 2;
-					else
-						xSpeed = -iSpeed / 2;
-					if (ySpeed > 0)
-						ySpeed = iSpeed / 2;
-					else
-						ySpeed = -iSpeed / 2;
-				}
-				break;
-			case ID_SPEED_MEDIUM:
-				iSpeed = 30;
-				if (xSpeed == 0)
-				{
-					if (ySpeed > 0)
-						ySpeed = iSpeed;
-					else
-						ySpeed = -iSpeed;
-				}
-				else
-				{
-					if (xSpeed > 0)
-						xSpeed = iSpeed / 2;
-					else
-						xSpeed = -iSpeed / 2;
-					if (ySpeed > 0)
-						ySpeed = iSpeed / 2;
-					else
-						ySpeed = -iSpeed / 2;
-				}
-				break;
-			case ID_SPEED_SLOW:
-				iSpeed = 10;
-				if (xSpeed == 0)
-				{
-					if (ySpeed > 0)
-						ySpeed = iSpeed;
-					else
-						ySpeed = -iSpeed;
-				}
-				else
-				{
-					if (xSpeed > 0)
-						xSpeed = iSpeed / 2;
-					else
-						xSpeed = -iSpeed / 2;
-					if (ySpeed > 0)
-						ySpeed = iSpeed / 2;
-					else
-						ySpeed = -iSpeed / 2;
-				}
-				break;
-			case ID_COLOR_CYAN:
-				cColor = 'c';
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_COLOR_MAGENTA:
-				cColor = 'm';
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_COLOR_YELLOW:
-				cColor = 'y';
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_SHAPE_CIRCLE:
-				bShape = false;
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_SHAPE_RECTANGLE:
-				bShape = true;
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_STEP_2:
-				iStep = 2;
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_STEP_3:
-				iStep = 3;
-				for (int i = 0; i < iStep; ++i)
-					for (int j = 0; j < 10; ++j)
-					{
-						bBlock[(i * 10) + j].rect.left = rClient.right * (j + 1) / 12;
-						bBlock[(i * 10) + j].rect.right = rClient.right * (j + 2) / 12;
-						bBlock[(i * 10) + j].rect.top = rClient.top + (50 * i);
-						bBlock[(i * 10) + j].rect.bottom = rClient.top + (50 * (i + 1));
-						bBlock[(i * 10) + j].stat = 0;
-					}
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_STEP_4:
-				iStep = 4;
-				for (int i = 0; i < iStep; ++i)
-					for (int j = 0; j < 10; ++j)
-					{
-						bBlock[(i * 10) + j].rect.left = rClient.right * (j + 1) / 12;
-						bBlock[(i * 10) + j].rect.right = rClient.right * (j + 2) / 12;
-						bBlock[(i * 10) + j].rect.top = rClient.top + (50 * i);
-						bBlock[(i * 10) + j].rect.bottom = rClient.top + (50 * (i + 1));
-						bBlock[(i * 10) + j].stat = 0;
-					}
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_MOVE_ON:
-				bBmove = true;
-				for (int i = 0; i < iStep; ++i)
-					for (int j = 0; j < 10; ++j)
-					{
-						if (bBlock[(i * 10) + j].rect.right >= rClient.right)
-						{
-							bBlock[(i * 10) + j].rect.left
-								-= rClient.right * 2 / 12;
-							bBlock[(i * 10) + j].rect.right
-								-= rClient.right * 2 / 12;
-						}
-						else
-						{
-							bBlock[(i * 10) + j].rect.left
-								+= rClient.right / 12;
-							bBlock[(i * 10) + j].rect.right
-								+= rClient.right / 12;
-						}
-					}
-				SetTimer(hWnd, 2, 1000, NULL);
-				InvalidateRect(hWnd, &rClient, true);
-				break;
-			case ID_MOVE_OFF:
-				bBmove = false;
-				break;
 			}
-			break;
+		break;
 	case WM_DESTROY:						// 메시지에 따라 처리
 		PostQuitMessage(0);
 		break;
