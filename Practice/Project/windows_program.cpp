@@ -25,7 +25,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		lpszWindowName,
 		WS_OVERLAPPEDWINDOW,
 		0, 0,
-		800, 600,
+		WINDOW_WIDTH, WINDOW_HEIGHT,
 		NULL,
 		(HMENU)NULL,
 		hInstance,
@@ -46,6 +46,9 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	HDC hdc, hMemDc;
 	static HBITMAP hBitmap;
 	static RECT rClient{};
+	static DWORD dwRop{ SRCCOPY };
+	constexpr int imageWidth{ 640 }, imageHeight{ 426 };
+	static int wDest{ imageWidth }, hDest{ imageHeight };
 
 	// 메시지 처리하기
 	switch (iMessage)
@@ -58,15 +61,45 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hdc = BeginPaint(hWnd, &ps);
 		hMemDc = CreateCompatibleDC(hdc);
 		SelectObject(hMemDc, hBitmap);
-		BitBlt(hdc, 0, 0, 640, 426, hMemDc, 0, 0, SRCCOPY);
+		StretchBlt(hdc, 0, 0, wDest, hDest, hMemDc, 0, 0, imageWidth, imageHeight, dwRop);
 
 		DeleteDC(hMemDc);
 		EndPaint(hWnd, &ps);
 		break;
+	case WM_CHAR:
+		switch (wParam)
+		{
+		case 'Q':
+		case 'q':
+		case VK_ESCAPE:
+			PostQuitMessage(0);
+			break;
+		case 'R':
+		case 'r':
+			if (dwRop == SRCCOPY)
+				dwRop = NOTSRCCOPY;
+			else dwRop = SRCCOPY;
+			InvalidateRect(hWnd, &rClient, true);
+			break;
+		case 'A':
+		case 'a':
+			if (wDest == imageWidth && hDest == imageHeight)
+			{
+				wDest = WINDOW_WIDTH;
+				hDest = WINDOW_HEIGHT;
+			}
+			else
+			{
+				wDest = imageWidth;
+				hDest = imageHeight;
+			}
+			InvalidateRect(hWnd, &rClient, true);
+			break;
+		}
+		break;
 	case WM_LBUTTONDOWN:
 	case WM_RBUTTONDOWN:
 	case WM_RBUTTONUP:
-	case WM_CHAR:
 	case WM_MOUSEMOVE:
 	case WM_KEYDOWN:
 	case WM_COMMAND:

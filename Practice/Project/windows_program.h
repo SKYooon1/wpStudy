@@ -11,3 +11,6 @@ static LPCTSTR lpszWindowName = L"Windows program 5_1";
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow);
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
+
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
