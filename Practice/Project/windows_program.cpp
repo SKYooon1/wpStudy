@@ -1,4 +1,5 @@
 #include "windows_program.h"
+#include "myFunction.h"
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -46,9 +47,13 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	HDC hdc, hMemDc;
 	static HBITMAP hBitmap;
 	static RECT rClient{};
+
 	static DWORD dwRop{ SRCCOPY };
 	constexpr int imageWidth{ 640 }, imageHeight{ 426 };
-	static int wDest{ imageWidth }, hDest{ imageHeight };
+	static int wPrint{ imageWidth }, hPrint{ imageHeight };
+	static std::vector<int> xDest{ 0 }, yDest{ 0 };
+	static std::vector<int> wDest{wPrint}, hDest{hPrint};
+	static char rectDivided{ '1' };
 
 	// 메시지 처리하기
 	switch (iMessage)
@@ -56,12 +61,23 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		GetClientRect(hWnd, &rClient);
 		hBitmap = (HBITMAP)LoadBitmap(globalHInstance, MAKEINTRESOURCE(IDB_BITMAP1));
+		for (int i = 1; i< 3; ++i)
+		{
+			xDest.push_back(0);
+			yDest.push_back(0);
+			wDest.push_back(0);
+			hDest.push_back(0);
+		}
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		hMemDc = CreateCompatibleDC(hdc);
 		SelectObject(hMemDc, hBitmap);
-		StretchBlt(hdc, 0, 0, wDest, hDest, hMemDc, 0, 0, imageWidth, imageHeight, dwRop);
+
+		for (int line = 0; line < 3; ++line)
+			for (int row = 0; row < 3; ++row)
+				StretchBlt(hdc, xDest[line], yDest[row], wDest[line], hDest[row],
+					hMemDc, 0, 0, imageWidth, imageHeight, dwRop);
 
 		DeleteDC(hMemDc);
 		EndPaint(hWnd, &ps);
@@ -83,27 +99,38 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			break;
 		case 'A':
 		case 'a':
-			if (wDest == imageWidth && hDest == imageHeight)
+			if (wPrint == imageWidth && hPrint == imageHeight)
 			{
-				wDest = WINDOW_WIDTH;
-				hDest = WINDOW_HEIGHT;
+				wPrint = WINDOW_WIDTH;
+				hPrint = WINDOW_HEIGHT;
 			}
 			else
 			{
-				wDest = imageWidth;
-				hDest = imageHeight;
+				wPrint = imageWidth;
+				hPrint = imageHeight;
 			}
+			printNew(xDest, yDest, wDest, hDest, wPrint, hPrint, rectDivided);
+			InvalidateRect(hWnd, &rClient, true);
+			break;
+		case '1':
+			printNew(xDest, yDest, wDest, hDest, wPrint, hPrint, '1');
+			rectDivided = '1';
+			InvalidateRect(hWnd, &rClient, true);
+			break;
+		case '2':
+			printNew(xDest, yDest, wDest, hDest, wPrint, hPrint, '2');
+			rectDivided = '2';
+			InvalidateRect(hWnd, &rClient, true);
+			break;
+		case '3':
+			printNew(xDest, yDest, wDest, hDest, wPrint, hPrint, '3');
+			rectDivided = '3';
 			InvalidateRect(hWnd, &rClient, true);
 			break;
 		}
 		break;
 	case WM_LBUTTONDOWN:
-	case WM_RBUTTONDOWN:
-	case WM_RBUTTONUP:
-	case WM_MOUSEMOVE:
 	case WM_KEYDOWN:
-	case WM_COMMAND:
-	case WM_TIMER:
 		break;
 	case WM_DESTROY:						// 메시지에 따라 처리
 		DeleteObject(hBitmap);
