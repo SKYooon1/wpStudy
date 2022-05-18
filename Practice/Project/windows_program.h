@@ -1,0 +1,13 @@
+#pragma once
+
+#include <Windows.h>
+#include <tchar.h>
+#include "resource.h"
+
+static HINSTANCE globalHInstance;
+static LPCTSTR lpszClass = L"Window Class Name";
+static LPCTSTR lpszWindowName = L"Windows program 5_1";
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow);
+
+LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);

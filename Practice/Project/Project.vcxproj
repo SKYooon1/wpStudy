@@ -19,13 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="WinMain.cpp" />
-    <ClCompile Include="wndProc.cpp" />
+    <ClCompile Include="windows_program.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="resource.h" />
-    <ClInclude Include="WinMain.h" />
-    <ClInclude Include="wndProc.h" />
+    <ClInclude Include="windows_program.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Project.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\..\..\sample_640×426.bmp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
