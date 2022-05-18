@@ -1,7 +1,7 @@
 #pragma once
 
-#include <Windows.h>
 #include <tchar.h>
+#include "myFunction.h"
 #include "resource.h"
 
 static HINSTANCE globalHInstance;

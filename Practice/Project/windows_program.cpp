@@ -1,5 +1,4 @@
 #include "windows_program.h"
-#include "myFunction.h"
 
 int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 {
@@ -45,6 +44,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hdc, hMemDc;
+	HBRUSH hBrush, oldBrush;
 	static HBITMAP hBitmap;
 	static RECT rClient{};
 
@@ -54,6 +54,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static std::vector<int> xDest{ 0 }, yDest{ 0 };
 	static std::vector<int> wDest{wPrint}, hDest{hPrint};
 	static char rectDivided{ '1' };
+	RECT tempRect = {};
 
 	// 메시지 처리하기
 	switch (iMessage)
@@ -130,6 +131,20 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_LBUTTONDOWN:
+		hdc = GetDC(hWnd);
+
+		hBrush = CreateSolidBrush(RGB(255, 0, 0));
+		oldBrush = static_cast<HBRUSH>(SelectObject(hdc, hBrush));
+		for (int line = 0; line < 3; ++line)
+			for (int row = 0; row < 3; ++row)
+				if (inBox(LOWORD(lParam), HIWORD(lParam),
+					tempRect = { xDest[line], yDest[row], wDest[line], hDest[row] }))
+					FrameRect(hdc, &tempRect, hBrush);
+		SelectObject(hdc, oldBrush);
+		DeleteObject(hBrush);
+
+		ReleaseDC(hWnd, hdc);
+		break;
 	case WM_KEYDOWN:
 		break;
 	case WM_DESTROY:						// 메시지에 따라 처리

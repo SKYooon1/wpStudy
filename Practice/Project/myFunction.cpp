@@ -48,3 +48,10 @@ void printNew(std::vector<int>& xDest, std::vector<int>& yDest,
 		break;
 	}
 }
+
+BOOL inBox(int x, int y, RECT rect)
+{
+	if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom)
+		return true;
+	else return false;
+}
