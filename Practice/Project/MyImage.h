@@ -14,13 +14,13 @@ public:
 	RECT getRect() const;
 	void setX(const int x);
 	void setY(const int y);
-	void setW(const int w);
-	void setH(const int h);
+	void setWh(const int w, const int h);
 	void reset();
 private:
-	int x, y;
-	int width, height;
-	RECT rect;
-
+	int x_;
+	int y_;
+	int width_;
+	int height_;
+	RECT rect_;
 };
 

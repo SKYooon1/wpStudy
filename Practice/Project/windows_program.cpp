@@ -63,15 +63,14 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hBitmap = (HBITMAP)LoadBitmap(globalHInstance, MAKEINTRESOURCE(IDB_BITMAP1));
 
 		images.resize(9);
-		images[0].setW(wPrint);
-		images[0].setH(hPrint);
+		images[0].setWh(wPrint, hPrint);
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		hMemDc = CreateCompatibleDC(hdc);
 		SelectObject(hMemDc, hBitmap);
 
-		for (const MyImage image : images)
+		for (MyImage image : images)
 		{
 			StretchBlt(hdc, image.getX(), image.getY(), image.getW(), image.getH(),
 				hMemDc, 0, 0, imageWidth, imageHeight, dwRop);
