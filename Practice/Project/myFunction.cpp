@@ -1,5 +1,44 @@
 #include "myFunction.h"
 
+void resetImages(std::vector<MyImage> images, const int wPrint, const int hPrint, const char split)
+{
+	switch (split)
+	{
+	case '1':
+		for (MyImage image : images)
+			image.reset();
+
+		images[0].setW(wPrint);
+		images[0].setH(hPrint);
+		break;
+	case '2':
+		for (MyImage image : images)
+			image.reset();
+		
+		images[1].setX(wPrint / 2);
+		images[1].setY(hPrint / 2);
+
+		images[0].setW(wPrint / 2);
+		images[0].setH(hPrint / 2);
+		images[1].setW(wPrint / 2);
+		images[1].setH(hPrint / 2);
+		break;
+	case '3':
+		for (MyImage image : images)
+		{
+			image.reset();
+			image.setW(wPrint / 3);
+			image.setH(wPrint / 3);
+		}
+
+		images[1].setX(wPrint / 3);
+		images[1].setY(hPrint / 3);
+		images[2].setX(wPrint * 2 / 3);
+		images[2].setY(hPrint * 2 / 3);
+		break;
+	}
+}
+
 void printNew(std::vector<int>& xDest, std::vector<int>& yDest,
               std::vector<int>& wDest, std::vector<int>& hDest,
               const int wPrint, const int hPrint, char c)
@@ -54,4 +93,9 @@ BOOL inBox(int x, int y, RECT rect)
 	if (x > rect.left && x < rect.right && y > rect.top && y < rect.bottom)
 		return true;
 	else return false;
+}
+
+int selectBox(WORD param, RECT rect)
+{
+	return {};
 }

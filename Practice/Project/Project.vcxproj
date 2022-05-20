@@ -19,10 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="MyImage.cpp" />
     <ClCompile Include="myFunction.cpp" />
     <ClCompile Include="windows_program.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="MyImage.h" />
     <ClInclude Include="myFunction.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="windows_program.h" />

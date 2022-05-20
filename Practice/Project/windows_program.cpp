@@ -51,8 +51,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static DWORD dwRop{ SRCCOPY };
 	constexpr int imageWidth{ 640 }, imageHeight{ 426 };
 	static int wPrint{ imageWidth }, hPrint{ imageHeight };
-	static std::vector<int> xDest{ 0 }, yDest{ 0 };
-	static std::vector<int> wDest{wPrint}, hDest{hPrint};
+	static std::vector<MyImage> images{};
 	static char rectDivided{ '1' };
 	RECT tempRect = {};
 
@@ -62,23 +61,21 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		GetClientRect(hWnd, &rClient);
 		hBitmap = (HBITMAP)LoadBitmap(globalHInstance, MAKEINTRESOURCE(IDB_BITMAP1));
-		for (int i = 1; i< 3; ++i)
-		{
-			xDest.push_back(0);
-			yDest.push_back(0);
-			wDest.push_back(0);
-			hDest.push_back(0);
-		}
+
+		images.resize(9);
+		images[0].setW(wPrint);
+		images[0].setH(hPrint);
 		break;
 	case WM_PAINT:
 		hdc = BeginPaint(hWnd, &ps);
 		hMemDc = CreateCompatibleDC(hdc);
 		SelectObject(hMemDc, hBitmap);
 
-		for (int line = 0; line < 3; ++line)
-			for (int row = 0; row < 3; ++row)
-				StretchBlt(hdc, xDest[line], yDest[row], wDest[line], hDest[row],
-					hMemDc, 0, 0, imageWidth, imageHeight, dwRop);
+		for (const MyImage image : images)
+		{
+			StretchBlt(hdc, image.getX(), image.getY(), image.getW(), image.getH(),
+				hMemDc, 0, 0, imageWidth, imageHeight, dwRop);
+		}
 
 		DeleteDC(hMemDc);
 		EndPaint(hWnd, &ps);
@@ -110,21 +107,21 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 				wPrint = imageWidth;
 				hPrint = imageHeight;
 			}
-			printNew(xDest, yDest, wDest, hDest, wPrint, hPrint, rectDivided);
+			resetImages(images, wPrint, hPrint, rectDivided);
 			InvalidateRect(hWnd, &rClient, true);
 			break;
 		case '1':
-			printNew(xDest, yDest, wDest, hDest, wPrint, hPrint, '1');
+			resetImages(images, wPrint, hPrint, '1');
 			rectDivided = '1';
 			InvalidateRect(hWnd, &rClient, true);
 			break;
 		case '2':
-			printNew(xDest, yDest, wDest, hDest, wPrint, hPrint, '2');
+			resetImages(images, wPrint, hPrint, '2');
 			rectDivided = '2';
 			InvalidateRect(hWnd, &rClient, true);
 			break;
 		case '3':
-			printNew(xDest, yDest, wDest, hDest, wPrint, hPrint, '3');
+			resetImages(images, wPrint, hPrint, '3');
 			rectDivided = '3';
 			InvalidateRect(hWnd, &rClient, true);
 			break;
@@ -135,11 +132,11 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		hBrush = CreateSolidBrush(RGB(255, 0, 0));
 		oldBrush = static_cast<HBRUSH>(SelectObject(hdc, hBrush));
-		for (int line = 0; line < 3; ++line)
-			for (int row = 0; row < 3; ++row)
-				if (inBox(LOWORD(lParam), HIWORD(lParam),
-					tempRect = { xDest[line], yDest[row], wDest[line], hDest[row] }))
-					FrameRect(hdc, &tempRect, hBrush);
+		for (MyImage image : images)
+		{
+			if (inBox(LOWORD(lParam), HIWORD(lParam), tempRect = image.getRect()))
+				FrameRect(hdc, &tempRect, hBrush);
+		}
 		SelectObject(hdc, oldBrush);
 		DeleteObject(hBrush);
 
