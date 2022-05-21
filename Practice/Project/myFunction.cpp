@@ -5,13 +5,13 @@ void resetImages(std::vector<MyImage>& images, const int wPrint, const int hPrin
 	switch (split)
 	{
 	case '1':
-		for (MyImage image : images)
+		for (MyImage& image : images)
 			image.reset();
 
 		images[0].setWh(wPrint, hPrint);
-		break;
+		return;
 	case '2':
-		for (MyImage image : images)
+		for (MyImage& image : images)
 			image.reset();
 
 		images[1].setX(0);
@@ -23,9 +23,9 @@ void resetImages(std::vector<MyImage>& images, const int wPrint, const int hPrin
 
 		for (int i = 0; i < 4; ++i)
 			images[i].setWh(wPrint / 2, hPrint / 2);
-		break;
+		return;
 	case '3':
-		for (MyImage image : images)
+		for (MyImage& image : images)
 		{
 			image.reset();
 			image.setWh(wPrint / 3, hPrint / 3);
@@ -39,10 +39,12 @@ void resetImages(std::vector<MyImage>& images, const int wPrint, const int hPrin
 
 		for (int i = 0; i < 3; ++i)
 		{
-			images[i].setY()
+			images[i + 3].setY(hPrint / 3);
+			images[i + 6].setY(hPrint * 2 / 3);
 		}
-		
-		break;
+		return;
+	default:
+		return;
 	}
 	return;
 }

@@ -70,7 +70,7 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hMemDc = CreateCompatibleDC(hdc);
 		SelectObject(hMemDc, hBitmap);
 
-		for (MyImage image : images)
+		for (const MyImage image : images)
 		{
 			StretchBlt(hdc, image.getX(), image.getY(), image.getW(), image.getH(),
 				hMemDc, 0, 0, imageWidth, imageHeight, dwRop);
