@@ -25,7 +25,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int n
 		lpszWindowName,
 		WS_OVERLAPPEDWINDOW,
 		0, 0,
-		WINDOW_WIDTH, WINDOW_HEIGHT,
+		DEFAULT_WIDTH, DEFAULT_HEIGHT,
 		NULL,
 		(HMENU)NULL,
 		hInstance,
@@ -53,7 +53,6 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	static int wPrint{ imageWidth }, hPrint{ imageHeight };
 	static std::vector<MyImage> images{};
 	static char rectDivided{ '1' };
-	RECT tempRect = {};
 
 	// 메시지 처리하기
 	switch (iMessage)
@@ -101,8 +100,9 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		case 'a':
 			if (wPrint == imageWidth && hPrint == imageHeight)
 			{
-				wPrint = WINDOW_WIDTH;
-				hPrint = WINDOW_HEIGHT;
+				GetClientRect(hWnd, &rClient);
+				wPrint = rClient.right;
+				hPrint = rClient.bottom;
 			}
 			else
 			{

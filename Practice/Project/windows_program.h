@@ -12,5 +12,5 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 
 LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam);
 
-#define WINDOW_WIDTH 800
-#define WINDOW_HEIGHT 600
+#define DEFAULT_WIDTH 800
+#define DEFAULT_HEIGHT 600
