@@ -7,4 +7,4 @@ void resetImages(std::vector<MyImage>& images, const int wPrint, const int hPrin
 
 BOOL inBox(const int x, const int y, const RECT rect);
 
-int selectBox(WORD param, RECT rect);
+void printSelected(const std::vector<MyImage> images, const HDC hdc);

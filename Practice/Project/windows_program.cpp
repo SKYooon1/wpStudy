@@ -70,13 +70,16 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		hMemDc = CreateCompatibleDC(hdc);
 		SelectObject(hMemDc, hBitmap);
 
-		for (const MyImage image : images)
+		for (const MyImage& image : images)
 		{
 			StretchBlt(hdc, image.getX(), image.getY(), image.getW(), image.getH(),
 				hMemDc, 0, 0, imageWidth, imageHeight, dwRop);
 		}
 
 		DeleteDC(hMemDc);
+
+		printSelected(images, hdc);
+
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_CHAR:
@@ -127,19 +130,19 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_LBUTTONDOWN:
-		hdc = GetDC(hWnd);
+		for (MyImage& image : images)
+			image.setSelected(false);
 
-		hBrush = CreateSolidBrush(RGB(255, 0, 0));
-		oldBrush = static_cast<HBRUSH>(SelectObject(hdc, hBrush));
-		for (MyImage image : images)
+		for (MyImage& image : images)
 		{
-			if (inBox(LOWORD(lParam), HIWORD(lParam), tempRect = image.getRect()))
-				FrameRect(hdc, &tempRect, hBrush);
+			if (inBox(LOWORD(lParam), HIWORD(lParam), image.getRect()))
+			{
+				image.setSelected(true);
+				break;
+			}
 		}
-		SelectObject(hdc, oldBrush);
-		DeleteObject(hBrush);
 
-		ReleaseDC(hWnd, hdc);
+		InvalidateRect(hWnd, &rClient, true);
 		break;
 	case WM_KEYDOWN:
 		break;
