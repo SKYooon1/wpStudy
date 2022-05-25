@@ -59,7 +59,8 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 	{	// 메시지 번호
 	case WM_CREATE:
 		GetClientRect(hWnd, &rClient);
-		hBitmap = (HBITMAP)LoadBitmap(globalHInstance, MAKEINTRESOURCE(IDB_BITMAP1));
+		hBitmap = (HBITMAP)LoadImage(globalHInstance, TEXT("image1.bmp"),
+			IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 
 		images.resize(9);
 		images[0].setWh(wPrint, hPrint);

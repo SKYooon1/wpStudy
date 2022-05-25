@@ -29,13 +29,13 @@
     <ClInclude Include="windows_program.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="resource.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
     <ClInclude Include="myFunction.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="MyImage.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>
@@ -45,7 +45,7 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\sample_640×426.bmp">
+    <Image Include="image1.bmp">
       <Filter>리소스 파일</Filter>
     </Image>
   </ItemGroup>

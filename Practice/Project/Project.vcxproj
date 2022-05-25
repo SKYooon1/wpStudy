@@ -33,7 +33,7 @@
     <ResourceCompile Include="Project.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\..\..\sample_640×426.bmp" />
+    <Image Include="image1.bmp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
