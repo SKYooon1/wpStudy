@@ -9,19 +9,24 @@ public:
 
 	bool isSelected() const;
 
+	RECT getRect();
+
+	void reset();
+
+	void moveX(int x);
+
+	void scaleWh(int w, int h);
+
 	int getX() const;
 	int getY() const;
 	int getW() const;
 	int getH() const;
-
-	RECT getRect();
 
 	void setX(const int x);
 	void setY(const int y);
 	void setWh(const int w, const int h);
 	void setSelected(const bool b);
 
-	void reset();
 private:
 	int x_;
 	int y_;

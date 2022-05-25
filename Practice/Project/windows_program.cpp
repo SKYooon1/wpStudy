@@ -78,8 +78,6 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 
 		DeleteDC(hMemDc);
 
-		printSelected(images, hdc);
-
 		EndPaint(hWnd, &ps);
 		break;
 	case WM_CHAR:
@@ -128,6 +126,22 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 			rectDivided = '3';
 			InvalidateRect(hWnd, &rClient, true);
 			break;
+		case '+':
+			for (MyImage& image : images)
+			{
+				if (image.isSelected())
+					image.scaleWh(5, 5);
+			}
+			InvalidateRect(hWnd, &rClient, true);
+			break;
+		case '-':
+			for (MyImage& image : images)
+			{
+				if (image.isSelected())
+					image.scaleWh(-5, -5);
+			}
+			InvalidateRect(hWnd, &rClient, true);
+			break;
 		}
 		break;
 	case WM_LBUTTONDOWN:
@@ -146,6 +160,25 @@ LRESULT CALLBACK wndProc(HWND hWnd, UINT iMessage, WPARAM wParam, LPARAM lParam)
 		InvalidateRect(hWnd, &rClient, true);
 		break;
 	case WM_KEYDOWN:
+		switch (wParam)
+		{
+		case VK_LEFT:
+			for (MyImage& image : images)
+			{
+				if (image.isSelected())
+					image.moveX(-5);
+			}
+			InvalidateRect(hWnd, &rClient, true);
+			break;
+		case VK_RIGHT:
+			for (MyImage& image : images)
+			{
+				if (image.isSelected())
+					image.moveX(5);
+			}
+			InvalidateRect(hWnd, &rClient, true);
+			break;
+		}
 		break;
 	case WM_DESTROY:						// 메시지에 따라 처리
 		DeleteObject(hBitmap);

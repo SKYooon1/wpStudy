@@ -51,25 +51,3 @@ BOOL inBox(const int x, const int y, const RECT rect)
 		return true;
 	else return false;
 }
-
-void printSelected(const std::vector<MyImage> images, const HDC hdc)
-{
-	if (images[0].isSelected())
-		Rectangle(hdc, images[0].getX(), images[0].getY(), images[0].getW(), images[0].getH());
-	else if (images[1].isSelected())
-		Rectangle(hdc, images[1].getX(), images[1].getY(), images[1].getW(), images[1].getH());
-	else if (images[2].isSelected())
-		Rectangle(hdc, images[2].getX(), images[2].getY(), images[2].getW(), images[2].getH());
-	else if (images[3].isSelected())
-		Rectangle(hdc, images[3].getX(), images[3].getY(), images[3].getW(), images[3].getH());
-	else if (images[4].isSelected())
-		Rectangle(hdc, images[4].getX(), images[4].getY(), images[4].getW(), images[4].getH());
-	else if (images[5].isSelected())
-		Rectangle(hdc, images[5].getX(), images[5].getY(), images[5].getW(), images[5].getH());
-	else if (images[6].isSelected())
-		Rectangle(hdc, images[6].getX(), images[6].getY(), images[6].getW(), images[6].getH());
-	else if (images[7].isSelected())
-		Rectangle(hdc, images[7].getX(), images[7].getY(), images[7].getW(), images[7].getH());
-	else if (images[8].isSelected())
-		Rectangle(hdc, images[8].getX(), images[8].getY(), images[8].getW(), images[8].getH());
-}
